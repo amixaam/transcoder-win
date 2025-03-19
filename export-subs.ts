@@ -65,12 +65,12 @@ const languageCodes = [
   "und",
 ];
 
-export const exportSubtitles = async (destinationDir: string) => {
-  const files = await readdir(destinationDir, { recursive: true });
+export const exportSubtitles = async (absoluteDestinationDir: string) => {
+  const files = await readdir(absoluteDestinationDir, { recursive: true });
 
   files.forEach(async (file) => {
     if (!file.endsWith(".mkv")) return;
-    const fullPath = resolve(destinationDir, file);
+    const fullPath = resolve(absoluteDestinationDir, file);
     const fileDir = dirname(fullPath);
 
     let currentTrack: Track = {} as Track;

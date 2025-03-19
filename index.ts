@@ -1,10 +1,17 @@
 import { $ } from "bun";
 import { mkdir, readdir } from "node:fs/promises";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { exit } from "node:process";
 import { METADATA_DIR } from "./consts";
-import { acquireLock, log, releaseLock, waitSleepHours } from "./utils";
+import {
+  acquireLock,
+  log,
+  releaseLock,
+  waitSleepHours,
+  type JSONMetadata,
+} from "./utils";
 import { exportSubtitles } from "./export-subs";
+import { transcodeVideos } from "./transcode-videos";
 // USAGE: bun run index.ts {torrent_name} {source_dir}
 // EXAMPLE: bun run index.ts "SAKAMOTO.DAYS.S01.[DB]" "D:/TORRENT/TEMP/SAKAMOTO DAYS S01 [DB]"
 
@@ -52,7 +59,7 @@ type fileType = "file" | "directory";
 async function main() {
   try {
     await acquireLock();
-    // await waitSleepHours();
+    await waitSleepHours();
 
     const getArgs = () => {
       const args = Bun.argv;
@@ -66,6 +73,15 @@ async function main() {
     };
     const { TORRENT_NAME, SOURCE_DIR } = getArgs();
 
+    // check if .json exists
+    const jsonPath = join(METADATA_DIR, `${TORRENT_NAME}.json`);
+    const json = Bun.file(jsonPath);
+    if (!(await json.exists())) {
+      log(`Metadata file for ${TORRENT_NAME} not found`, "ERROR");
+      cleanup(1);
+    }
+    const jsonData: JSONMetadata = JSON.parse(await json.text());
+
     // find out it SOURCE_DIR is a directory or file
     const fileExists = await Bun.file(SOURCE_DIR).exists();
     let sourceType: fileType = "file";
@@ -76,16 +92,15 @@ async function main() {
       sourceType = "directory";
     }
 
-    // check if .json exists
-    const json = Bun.file(`${METADATA_DIR}${TORRENT_NAME}.json`);
-    if (!(await json.exists())) {
-      log(`Metadata file for ${TORRENT_NAME} not found`, "ERROR");
-      cleanup(1);
-    }
     log("Metadata and source found", "LOG");
 
-    const fullPath = resolve("./temp_media/");
-    const tempTorrentDir = `${fullPath}/${TORRENT_NAME}`;
+    const fullPath = join(process.cwd(), "temp_media");
+    const tempTorrentDir = join(fullPath, TORRENT_NAME);
+    log(
+      `\n FULLPATH: ${fullPath} \n JSONPATH: ${jsonPath} \n SOURCE_DIR: ${SOURCE_DIR} \n TEMPTORRENTDIR: ${tempTorrentDir} \n SOURCETYPE: ${sourceType} \n CWD: ${process.cwd()}`,
+      "VERBOSE",
+    );
+
     await mkdir(tempTorrentDir, { recursive: true });
 
     log(`Moving ${SOURCE_DIR} to ${tempTorrentDir}`, "LOG");
@@ -95,9 +110,9 @@ async function main() {
       await $`cp -R "${SOURCE_DIR}/" "${tempTorrentDir}"`;
     }
 
-    await exportSubtitles(tempTorrentDir);
+    // await exportSubtitles(tempTorrentDir);
 
-    // await transcodeVideos(tempTorrentDir);
+    await transcodeVideos(tempTorrentDir, jsonData.category);
 
     await releaseLock();
   } catch (error) {
