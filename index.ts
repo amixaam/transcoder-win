@@ -75,9 +75,10 @@ async function main() {
     const { TORRENT_NAME, SOURCE_DIR } = getArgs();
 
     const wslPath = await $`cmd.exe /C wsl wslpath "${SOURCE_DIR}"`.text();
+    const wslMetadataDir =
+      await $`cmd.exe /C wsl wslpath "${METADATA_DIR}"`.text();
 
     log(`WSL PATH: ${wslPath}`, "VERBOSE");
-    return;
 
     // check if .json exists
     const jsonPath = join(METADATA_DIR, `${TORRENT_NAME}.json`);
@@ -117,8 +118,8 @@ async function main() {
     }
 
     await exportSubtitles(tempTorrentDir);
-    await transcodeVideos(tempTorrentDir, jsonData.category);
-    await transferFiles(tempTorrentDir, jsonData);
+    // await transcodeVideos(tempTorrentDir, jsonData.category);
+    // await transferFiles(tempTorrentDir, jsonData);
 
     // remove temp directory and .json file
     log(`Removing ${tempTorrentDir} and ${jsonPath}`, "LOG");

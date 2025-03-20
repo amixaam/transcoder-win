@@ -1,5 +1,5 @@
 export const LOCK_FILE = "lockfile.lock";
-export const METADATA_DIR = "./metadata/";
+export const METADATA_DIR = "D:/TORRENT/TEMP/";
 export const TEMP_DIR = "./temp_media/";
 
 export const SUBTITLE_PRESET = "./presets/Toolbox 1080p Jellyfin-ready.json";
