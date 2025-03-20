@@ -72,10 +72,19 @@ const getHandbrakeArgs = async (metadata: Metadata, mediaCategory: string) => {
       );
     } else if (estimatedBitrate <= bitrateRange[0]!) {
       high = mid - 1;
-      log(
-        `Is LOWER than allowed bitrate (${estimatedBitrate} < ${bitrateRange[0]})Mb/s. Retrying. Estimated: ${estimatedBitrate} Mb/s (${estimatedBitrate} Mb/s)`,
-        "LOG",
-      );
+      if (best_bitrate <= estimatedBitrate) {
+        best_q = mid;
+        best_bitrate = estimatedBitrate;
+        log(
+          `Is LOWER than allowed bitrate, but is still New best bitrate: ${best_bitrate} Mb/s (${best_q} q)`,
+          "LOG",
+        );
+      } else {
+        log(
+          `Is LOWER than allowed bitrate (${estimatedBitrate} < ${bitrateRange[0]})Mb/s. Retrying. Estimated: ${estimatedBitrate} Mb/s (${estimatedBitrate} Mb/s)`,
+          "LOG",
+        );
+      }
     } else {
       // passes constraints, potential "Sweet spot"
       if (best_bitrate <= estimatedBitrate) {
@@ -92,14 +101,12 @@ const getHandbrakeArgs = async (metadata: Metadata, mediaCategory: string) => {
       }
     }
 
-    // TODO: Record each attempt and apply to best_q and best_bitrate if end result is still null (if source bitrate is below minimum bit range)
-
     // calculate new midpoint
     mid = Math.round((low + high) / 2);
   };
 
   let i = 1;
-  while (i < 6 || low <= high) {
+  while (i < 7 || low <= high) {
     let startAtSeconds = 0;
     log(`ATTEMPT ${i}, Trying for q: ${mid} and encoder: ${encoder}`, "LOG");
 
@@ -115,6 +122,10 @@ const getHandbrakeArgs = async (metadata: Metadata, mediaCategory: string) => {
 
     checkContstraints();
     i += 1;
+  }
+
+  if (best_q === null) {
+    log(`No successful transcode attempts found. Using default`, "WARN");
   }
 };
 
