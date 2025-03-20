@@ -26,29 +26,85 @@ const inRange = (value: number, range: number[]) => {
 // Transcodes first 30 seconds of video and predicts full size. Adjusts arguments accordingly.
 const getHandbrakeArgs = async (metadata: Metadata, mediaCategory: string) => {
   const outputFileName = metadata.fileName.split(".")[0]! + `_HBPROCESSED.mp4`;
+
   const encodeForSeconds = 30;
-
-  let estimatedSize = 100 * 1000;
-  let estimatedBitrate = 3001;
-
-  let q = 15;
-  let encoder = "x265";
-
-  if (!keepColorProfiles.includes(metadata.colorProfile)) {
-    encoder = "x265_10bit";
-  }
-
   const videoChunkCount = Math.ceil(metadata.length / encodeForSeconds);
+  const bitrateRange = getBitrateRange(mediaCategory);
 
-  while (
-    !inRange(estimatedSize, [metadata.size / 2, metadata.size * 1.1]) &&
-    !inRange(estimatedBitrate, getBitrateRange(mediaCategory))
-  ) {
-    let startAtSeconds = 0;
-    if (metadata.length > startAtSeconds + encodeForSeconds) {
+  let estimatedSize = Infinity;
+  let estimatedBitrate = 0;
+
+  const hwAccelType = "Toolbox";
+
+  let encoder = "x265";
+  if (!keepColorProfiles.includes(metadata.colorProfile))
+    encoder = "x265_10bit";
+
+  let q_min = 3;
+  let q_max = 30;
+
+  let low = q_min;
+  let high = q_max;
+  let mid = Math.round((low + high) / 2);
+
+  let best_q = null;
+  let best_bitrate = 0;
+
+  const checkContstraints = () => {
+    // 1. Should NOT be above 105% of the source file size
+    // 2. Should NOT be above the source bitrate
+    // 3. Should be WITHIN the bitrate range
+
+    if (estimatedSize >= metadata.size * 1.05) {
+      low = mid + 1;
+      log(
+        `Is HIGHER than source size (${estimatedSize} > ${metadata.size}). Retrying. Estimated: ${estimatedSize} MB (${estimatedBitrate} Mb/s)`,
+        "LOG",
+      );
+    } else if (
+      estimatedBitrate >= metadata.bitrate ||
+      estimatedBitrate >= bitrateRange[1]!
+    ) {
+      low = mid + 1;
+      log(
+        `Is HIGHER than allowed bitrate (${estimatedBitrate} > ${bitrateRange[1]!} or ${metadata.bitrate})Mb/s. Retrying. Estimated: ${estimatedSize} Mb (${estimatedBitrate} Mb/s)`,
+        "LOG",
+      );
+    } else if (estimatedBitrate <= bitrateRange[0]!) {
+      high = mid - 1;
+      log(
+        `Is LOWER than allowed bitrate (${estimatedBitrate} < ${bitrateRange[0]})Mb/s. Retrying. Estimated: ${estimatedBitrate} Mb/s (${estimatedBitrate} Mb/s)`,
+        "LOG",
+      );
+    } else {
+      // passes constraints, potential "Sweet spot"
+      if (best_bitrate <= estimatedBitrate) {
+        best_q = mid;
+        best_bitrate = estimatedBitrate;
+        high = mid - 1;
+        log(`New best bitrate: ${best_bitrate} Mb/s (${best_q} q)`, "LOG");
+      } else {
+        log(
+          `  Constraints MET, but not better than current best (${best_bitrate} Mb/s)`,
+          "LOG",
+        );
+        high = mid - 1; // Still try for lower q
+      }
     }
-    log(`Trying for q: ${q} and encoder: ${encoder}`, "LOG");
-    await $`HandBrakeCLI -i "${metadata.filePath}" -o "${dirname(metadata.filePath)}/${outputFileName}" --start-at seconds:${startAtSeconds} --stop-at seconds:${encodeForSeconds} -O --align-av -e ${encoder} -q ${q} --enable-hw-decoding toolbox`.quiet();
+
+    // TODO: Record each attempt and apply to best_q and best_bitrate if end result is still null (if source bitrate is below minimum bit range)
+
+    // calculate new midpoint
+    mid = Math.round((low + high) / 2);
+  };
+
+  let i = 1;
+  while (i < 6 || low <= high) {
+    let startAtSeconds = 0;
+    log(`ATTEMPT ${i}, Trying for q: ${mid} and encoder: ${encoder}`, "LOG");
+
+    // TODO: TEST OUT USING A PRESET WITH .MP4 AND OTHER. THIS CAN ALSO AFFECT VIDEO SIZE. TRY OVERWRITING Q PARAM
+    await $`HandBrakeCLI -i "${metadata.filePath}" -o "${dirname(metadata.filePath)}/${outputFileName}" --start-at seconds:${startAtSeconds} --stop-at seconds:${encodeForSeconds} -O --align-av -e ${encoder} -q ${mid} --enable-hw-decoding ${hwAccelType}`.quiet();
 
     const processedMetadata = await getVideoMetadata(
       resolve(dirname(metadata.filePath), outputFileName),
@@ -56,12 +112,9 @@ const getHandbrakeArgs = async (metadata: Metadata, mediaCategory: string) => {
 
     estimatedSize = processedMetadata!.size * videoChunkCount;
     estimatedBitrate = processedMetadata!.bitrate;
-    q += 0.5;
 
-    log(
-      `Estimated size: ${estimatedSize} MB and ${processedMetadata!.length} seconds (videochunks: ${videoChunkCount} (${metadata.length} / ${encodeForSeconds})) and estimated bitrate: ${estimatedBitrate} kbps`,
-      "LOG",
-    );
+    checkContstraints();
+    i += 1;
   }
 };
 
@@ -77,7 +130,7 @@ export const transcodeVideos = async (
 
   for await (const file of files) {
     if (!typesToTranscode.includes(file.split(".").pop()!)) continue;
-    await waitSleepHours();
+    // await waitSleepHours();
 
     const metadata = await getVideoMetadata(
       resolve(absoluteDestinationDir, file),
@@ -106,7 +159,13 @@ export const transcodeVideos = async (
       log(`Trying for best preset...`, "LOG");
       await getHandbrakeArgs(metadata, mediaCategory);
     }
+
+    // transcode video
+    // test out using a preset
   }
+
+  // remove every video file that isnt processed
+  // rename every processed video back to the original name
 
   log(`Done transcoding!`, "LOG");
 };

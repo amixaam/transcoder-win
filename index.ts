@@ -59,7 +59,7 @@ type fileType = "file" | "directory";
 async function main() {
   try {
     await acquireLock();
-    await waitSleepHours();
+    // await waitSleepHours();
 
     const getArgs = () => {
       const args = Bun.argv;

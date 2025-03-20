@@ -1457,3 +1457,348 @@
 [3/19/2025, 9:50:45 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E04.mkv
 [3/19/2025, 9:50:45 PM] [LOG] Done transcoding!
 [3/19/2025, 9:50:45 PM] [LOG] Lock released: lockfile.lock
+[3/19/2025, 11:40:38 PM] [LOG] Lock acquired: lockfile.lock
+[3/19/2025, 11:40:38 PM] [LOG] Sleeping until 3/20/2025, 7:30:24 AM
+[3/19/2025, 11:41:17 PM] [WARN] Cleaning up before exit with code 0
+[3/19/2025, 11:41:17 PM] [LOG] Lock released: lockfile.lock
+[3/19/2025, 11:41:17 PM] [LOG] Cleanup complete
+[3/19/2025, 11:41:19 PM] [LOG] Lock acquired: lockfile.lock
+[3/19/2025, 11:41:19 PM] [LOG] Sleeping until 3/20/2025, 7:30:22 AM
+[3/19/2025, 11:41:55 PM] [WARN] Cleaning up before exit with code 0
+[3/19/2025, 11:41:55 PM] [LOG] Lock released: lockfile.lock
+[3/19/2025, 11:41:55 PM] [LOG] Cleanup complete
+[3/19/2025, 11:41:56 PM] [LOG] Lock acquired: lockfile.lock
+[3/19/2025, 11:41:56 PM] [LOG] Metadata and source found
+[3/19/2025, 11:41:56 PM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/19/2025, 11:41:56 PM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/19/2025, 11:41:59 PM] [VERBOSE] in transcodeVideos
+[3/19/2025, 11:41:59 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E09.mkv
+[3/19/2025, 11:41:59 PM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/19/2025, 11:41:59 PM] [LOG] Trying for best preset...
+[3/19/2025, 11:41:59 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E08.mkv
+[3/19/2025, 11:42:00 PM] [LOG] Skipping transcoding of _HBPROCESSED file
+[3/19/2025, 11:42:00 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E01.mkv
+[3/19/2025, 11:42:00 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E03.mkv
+[3/19/2025, 11:42:00 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E02.mkv
+[3/19/2025, 11:42:00 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E12.mkv
+[3/19/2025, 11:42:00 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E06.mkv
+[3/19/2025, 11:42:00 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E07.mkv
+[3/19/2025, 11:42:00 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E05.mkv
+[3/19/2025, 11:42:00 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E11.mkv
+[3/19/2025, 11:42:01 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E10.mkv
+[3/19/2025, 11:42:01 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E04.mkv
+[3/19/2025, 11:42:01 PM] [LOG] Done transcoding!
+[3/19/2025, 11:42:01 PM] [LOG] Lock released: lockfile.lock
+[3/19/2025, 11:42:48 PM] [LOG] Lock acquired: lockfile.lock
+[3/19/2025, 11:42:48 PM] [LOG] Metadata and source found
+[3/19/2025, 11:42:48 PM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/19/2025, 11:42:48 PM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/19/2025, 11:42:50 PM] [VERBOSE] in transcodeVideos
+[3/19/2025, 11:42:51 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E09.mkv
+[3/19/2025, 11:42:51 PM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/19/2025, 11:42:51 PM] [LOG] Trying for best preset...
+[3/19/2025, 11:42:51 PM] [LOG] ATTEMPT 1, Trying for q: 10 and encoder: x265_10bit
+[3/19/2025, 11:43:00 PM] [WARN] Cleaning up before exit with code 0
+[3/19/2025, 11:43:15 PM] [LOG] Lock acquired: lockfile.lock
+[3/19/2025, 11:43:15 PM] [LOG] Metadata and source found
+[3/19/2025, 11:43:15 PM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/19/2025, 11:43:15 PM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/19/2025, 11:43:18 PM] [VERBOSE] in transcodeVideos
+[3/19/2025, 11:43:18 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E09.mkv
+[3/19/2025, 11:43:18 PM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/19/2025, 11:43:18 PM] [LOG] Trying for best preset...
+[3/19/2025, 11:43:18 PM] [LOG] ATTEMPT 1, Trying for q: 10 and encoder: x265_10bit
+[3/19/2025, 11:43:46 PM] [LOG] New best bitrate: 2 Mb/s (18 q)
+[3/19/2025, 11:43:46 PM] [LOG] ATTEMPT 1, Trying for q: 10 and encoder: x265_10bit
+[3/19/2025, 11:44:05 PM] [WARN] Cleaning up before exit with code 0
+[3/19/2025, 11:44:06 PM] [LOG] Lock acquired: lockfile.lock
+[3/19/2025, 11:44:06 PM] [LOG] Metadata and source found
+[3/19/2025, 11:44:06 PM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/19/2025, 11:44:06 PM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/19/2025, 11:44:07 PM] [VERBOSE] in transcodeVideos
+[3/19/2025, 11:44:08 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E09.mkv
+[3/19/2025, 11:44:08 PM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/19/2025, 11:44:08 PM] [LOG] Trying for best preset...
+[3/19/2025, 11:44:08 PM] [LOG] ATTEMPT 1, Trying for q: 18 and encoder: x265_10bit
+[3/19/2025, 11:44:37 PM] [LOG] New best bitrate: 2 Mb/s (18 q)
+[3/19/2025, 11:44:37 PM] [LOG] ATTEMPT 1, Trying for q: 11 and encoder: x265_10bit
+[3/19/2025, 11:45:14 PM] [LOG] Is HIGHER than source size. Retrying. Estimated: 480 MB (3 Mb/s)
+[3/19/2025, 11:45:14 PM] [LOG] ATTEMPT 1, Trying for q: 15 and encoder: x265_10bit
+[3/19/2025, 11:45:48 PM] [LOG] ATTEMPT 1, Trying for q: 15 and encoder: x265_10bit
+[3/19/2025, 11:46:02 PM] [WARN] Cleaning up before exit with code 0
+[3/19/2025, 11:46:02 PM] [LOG] Lock released: lockfile.lock
+[3/19/2025, 11:46:02 PM] [LOG] Cleanup complete
+[3/19/2025, 11:49:34 PM] [LOG] Lock acquired: lockfile.lock
+[3/19/2025, 11:49:34 PM] [LOG] Metadata and source found
+[3/19/2025, 11:49:34 PM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/19/2025, 11:49:34 PM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/19/2025, 11:49:37 PM] [VERBOSE] in transcodeVideos
+[3/19/2025, 11:49:38 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E09.mkv
+[3/19/2025, 11:49:38 PM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/19/2025, 11:49:38 PM] [LOG] Trying for best preset...
+[3/19/2025, 11:49:38 PM] [LOG] ATTEMPT 1, Trying for q: 18 and encoder: x265_10bit
+[3/19/2025, 11:50:05 PM] [LOG] New best bitrate: 2 Mb/s (18 q)
+[3/19/2025, 11:50:05 PM] [LOG] ATTEMPT 2, Trying for q: 11 and encoder: x265_10bit
+[3/19/2025, 11:50:41 PM] [LOG] Is HIGHER than source size (480 > 416). Retrying. Estimated: 480 MB (3 Mb/s)
+[3/19/2025, 11:50:41 PM] [LOG] ATTEMPT 3, Trying for q: 15 and encoder: x265_10bit
+[3/19/2025, 11:51:13 PM] [LOG] ATTEMPT 4, Trying for q: 15 and encoder: x265_10bit
+[3/19/2025, 11:51:47 PM] [LOG] ATTEMPT 5, Trying for q: 15 and encoder: x265_10bit
+[3/19/2025, 11:52:21 PM] [LOG] ATTEMPT 6, Trying for q: 15 and encoder: x265_10bit
+[3/19/2025, 11:52:28 PM] [WARN] Cleaning up before exit with code 0
+[3/19/2025, 11:57:21 PM] [LOG] Lock acquired: lockfile.lock
+[3/19/2025, 11:57:21 PM] [LOG] Metadata and source found
+[3/19/2025, 11:57:21 PM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/19/2025, 11:57:21 PM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/19/2025, 11:57:24 PM] [VERBOSE] in transcodeVideos
+[3/19/2025, 11:57:25 PM] [LOG] Transcoding [Judas] Chainsaw Man - S01E09.mkv
+[3/19/2025, 11:57:25 PM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/19/2025, 11:57:25 PM] [LOG] Trying for best preset...
+[3/19/2025, 11:57:25 PM] [LOG] ATTEMPT 1, Trying for q: 17 and encoder: x265_10bit
+[3/19/2025, 11:57:53 PM] [LOG] New best bitrate: 1.7099901333333332 Mb/s (17 q)
+[3/19/2025, 11:57:53 PM] [LOG] ATTEMPT 2, Trying for q: 10 and encoder: x265_10bit
+[3/19/2025, 11:58:29 PM] [LOG] Is HIGHER than source size (543.794448 > 415.822015). Retrying. Estimated: 543.794448 MB (3.021080266666667 Mb/s)
+[3/19/2025, 11:58:29 PM] [LOG] ATTEMPT 3, Trying for q: 14 and encoder: x265_10bit
+[3/19/2025, 11:59:03 PM] [LOG] New best bitrate: 2.164261333333333 Mb/s (14 q)
+[3/19/2025, 11:59:03 PM] [LOG] ATTEMPT 4, Trying for q: 12 and encoder: x265_10bit
+[3/19/2025, 11:59:39 PM] [LOG] Is HIGHER than source size (459.60144 > 415.822015). Retrying. Estimated: 459.60144 MB (2.5533413333333335 Mb/s)
+[3/19/2025, 11:59:39 PM] [LOG] ATTEMPT 5, Trying for q: 13 and encoder: x265_10bit
+[3/20/2025, 12:00:15 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:00:15 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E08.mkv
+[3/20/2025, 12:00:15 AM] [LOG] Skipping transcoding of _HBPROCESSED file
+[3/20/2025, 12:00:15 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E01.mkv
+[3/20/2025, 12:00:15 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E03.mkv
+[3/20/2025, 12:00:15 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E02.mkv
+[3/20/2025, 12:00:15 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E12.mkv
+[3/20/2025, 12:00:15 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E06.mkv
+[3/20/2025, 12:00:15 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E07.mkv
+[3/20/2025, 12:00:16 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E05.mkv
+[3/20/2025, 12:00:16 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E11.mkv
+[3/20/2025, 12:00:16 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E10.mkv
+[3/20/2025, 12:00:16 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E04.mkv
+[3/20/2025, 12:00:16 AM] [LOG] Done transcoding!
+[3/20/2025, 12:00:16 AM] [LOG] Lock released: lockfile.lock
+[3/20/2025, 12:08:59 AM] [LOG] Lock acquired: lockfile.lock
+[3/20/2025, 12:08:59 AM] [LOG] Metadata and source found
+[3/20/2025, 12:08:59 AM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/20/2025, 12:08:59 AM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 12:09:02 AM] [VERBOSE] in transcodeVideos
+[3/20/2025, 12:09:02 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E09.mkv
+[3/20/2025, 12:09:02 AM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 12:09:02 AM] [LOG] Trying for best preset...
+[3/20/2025, 12:09:02 AM] [LOG] ATTEMPT 1, Trying for q: 17 and encoder: x265_10bit
+[3/20/2025, 12:09:02 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:09:02 AM] [LOG] ATTEMPT 2, Trying for q: 24 and encoder: x265_10bit
+[3/20/2025, 12:09:03 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:09:03 AM] [LOG] ATTEMPT 3, Trying for q: 28 and encoder: x265_10bit
+[3/20/2025, 12:09:03 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:09:03 AM] [LOG] ATTEMPT 4, Trying for q: 30 and encoder: x265_10bit
+[3/20/2025, 12:09:03 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:09:03 AM] [LOG] ATTEMPT 5, Trying for q: 31 and encoder: x265_10bit
+[3/20/2025, 12:09:03 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:09:04 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E08.mkv
+[3/20/2025, 12:09:04 AM] [LOG] Skipping transcoding of _HBPROCESSED file
+[3/20/2025, 12:09:04 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E01.mkv
+[3/20/2025, 12:09:04 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E03.mkv
+[3/20/2025, 12:09:04 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E02.mkv
+[3/20/2025, 12:09:04 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E12.mkv
+[3/20/2025, 12:09:04 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E06.mkv
+[3/20/2025, 12:09:04 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E07.mkv
+[3/20/2025, 12:09:05 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E05.mkv
+[3/20/2025, 12:09:05 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E11.mkv
+[3/20/2025, 12:09:05 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E10.mkv
+[3/20/2025, 12:09:05 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E04.mkv
+[3/20/2025, 12:09:05 AM] [LOG] Done transcoding!
+[3/20/2025, 12:09:05 AM] [LOG] Lock released: lockfile.lock
+[3/20/2025, 12:09:34 AM] [LOG] Lock acquired: lockfile.lock
+[3/20/2025, 12:09:34 AM] [LOG] Metadata and source found
+[3/20/2025, 12:09:34 AM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/20/2025, 12:09:34 AM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 12:09:37 AM] [VERBOSE] in transcodeVideos
+[3/20/2025, 12:09:37 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E09.mkv
+[3/20/2025, 12:09:37 AM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 12:09:37 AM] [LOG] Trying for best preset...
+[3/20/2025, 12:09:37 AM] [LOG] ATTEMPT 1, Trying for q: 17 and encoder: x265_10bit
+[3/20/2025, 12:09:38 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:09:38 AM] [LOG] ATTEMPT 2, Trying for q: 24 and encoder: x265_10bit
+[3/20/2025, 12:09:38 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:09:38 AM] [LOG] ATTEMPT 3, Trying for q: 28 and encoder: x265_10bit
+[3/20/2025, 12:09:38 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:09:38 AM] [LOG] ATTEMPT 4, Trying for q: 30 and encoder: x265_10bit
+[3/20/2025, 12:09:38 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:09:38 AM] [LOG] ATTEMPT 5, Trying for q: 31 and encoder: x265_10bit
+[3/20/2025, 12:09:39 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:09:39 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E08.mkv
+[3/20/2025, 12:09:39 AM] [LOG] Skipping transcoding of _HBPROCESSED file
+[3/20/2025, 12:09:39 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E01.mkv
+[3/20/2025, 12:09:39 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E03.mkv
+[3/20/2025, 12:09:39 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E02.mkv
+[3/20/2025, 12:09:39 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E12.mkv
+[3/20/2025, 12:09:39 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E06.mkv
+[3/20/2025, 12:09:39 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E07.mkv
+[3/20/2025, 12:09:40 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E05.mkv
+[3/20/2025, 12:09:40 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E11.mkv
+[3/20/2025, 12:09:40 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E10.mkv
+[3/20/2025, 12:09:40 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E04.mkv
+[3/20/2025, 12:09:40 AM] [LOG] Done transcoding!
+[3/20/2025, 12:09:40 AM] [LOG] Lock released: lockfile.lock
+[3/20/2025, 12:09:55 AM] [LOG] Lock acquired: lockfile.lock
+[3/20/2025, 12:09:55 AM] [LOG] Metadata and source found
+[3/20/2025, 12:09:55 AM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/20/2025, 12:09:55 AM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 12:09:58 AM] [VERBOSE] in transcodeVideos
+[3/20/2025, 12:09:58 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E09.mkv
+[3/20/2025, 12:09:58 AM] [LOG] Trying for best preset...
+[3/20/2025, 12:09:58 AM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 12:09:58 AM] [LOG] ATTEMPT 1, Trying for q: 17 and encoder: x265_10bit
+[3/20/2025, 12:09:58 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:09:58 AM] [LOG] ATTEMPT 2, Trying for q: 24 and encoder: x265_10bit
+[3/20/2025, 12:09:59 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:09:59 AM] [LOG] ATTEMPT 3, Trying for q: 28 and encoder: x265_10bit
+[3/20/2025, 12:09:59 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:09:59 AM] [LOG] ATTEMPT 4, Trying for q: 30 and encoder: x265_10bit
+[3/20/2025, 12:09:59 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:09:59 AM] [LOG] ATTEMPT 5, Trying for q: 31 and encoder: x265_10bit
+[3/20/2025, 12:09:59 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:09:59 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E08.mkv
+[3/20/2025, 12:10:00 AM] [LOG] Skipping transcoding of _HBPROCESSED file
+[3/20/2025, 12:10:00 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E01.mkv
+[3/20/2025, 12:10:00 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E03.mkv
+[3/20/2025, 12:10:00 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E02.mkv
+[3/20/2025, 12:10:00 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E12.mkv
+[3/20/2025, 12:10:00 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E06.mkv
+[3/20/2025, 12:10:00 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E07.mkv
+[3/20/2025, 12:10:00 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E05.mkv
+[3/20/2025, 12:10:01 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E11.mkv
+[3/20/2025, 12:10:01 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E10.mkv
+[3/20/2025, 12:10:01 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E04.mkv
+[3/20/2025, 12:10:01 AM] [LOG] Done transcoding!
+[3/20/2025, 12:10:01 AM] [LOG] Lock released: lockfile.lock
+[3/20/2025, 12:10:37 AM] [LOG] Lock acquired: lockfile.lock
+[3/20/2025, 12:10:37 AM] [LOG] Metadata and source found
+[3/20/2025, 12:10:37 AM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/20/2025, 12:10:37 AM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Judas] Chainsaw Man (Season 1) [1080p][HEVC x265 10bit][Multi-Subs] to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 12:10:38 AM] [VERBOSE] in transcodeVideos
+[3/20/2025, 12:10:38 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E09.mkv
+[3/20/2025, 12:10:38 AM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 12:10:38 AM] [LOG] Trying for best preset...
+[3/20/2025, 12:10:38 AM] [LOG] ATTEMPT 1, Trying for q: 17 and encoder: x265_10bit
+[3/20/2025, 12:11:08 AM] [LOG] New best bitrate: 1.7099901333333332 Mb/s (17 q)
+[3/20/2025, 12:11:08 AM] [LOG] ATTEMPT 2, Trying for q: 10 and encoder: x265_10bit
+[3/20/2025, 12:11:45 AM] [LOG] Is HIGHER than source size (548.6153280000001 > 415.822015). Retrying. Estimated: 548.6153280000001 MB (3.047862933333333 Mb/s)
+[3/20/2025, 12:11:45 AM] [LOG] ATTEMPT 3, Trying for q: 14 and encoder: x265_10bit
+[3/20/2025, 12:12:20 AM] [LOG] New best bitrate: 2.164261333333333 Mb/s (14 q)
+[3/20/2025, 12:12:20 AM] [LOG] ATTEMPT 4, Trying for q: 12 and encoder: x265_10bit
+[3/20/2025, 12:12:56 AM] [LOG] Is HIGHER than source size (459.60144 > 415.822015). Retrying. Estimated: 459.60144 MB (2.5533413333333335 Mb/s)
+[3/20/2025, 12:12:56 AM] [LOG] ATTEMPT 5, Trying for q: 13 and encoder: x265_10bit
+[3/20/2025, 12:13:33 AM] [LOG] Is HIGHER than allowed bitrate (2.3471458666666667>3 or 2.318171512195122)Mb/s. Retrying. Estimated: 422.486256 Mb (2.3471458666666667 Mb/s)
+[3/20/2025, 12:13:33 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E08.mkv
+[3/20/2025, 12:13:33 AM] [LOG] Skipping transcoding of _HBPROCESSED file
+[3/20/2025, 12:13:33 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E01.mkv
+[3/20/2025, 12:13:33 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E03.mkv
+[3/20/2025, 12:13:33 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E02.mkv
+[3/20/2025, 12:13:33 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E12.mkv
+[3/20/2025, 12:13:34 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E06.mkv
+[3/20/2025, 12:13:34 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E07.mkv
+[3/20/2025, 12:13:34 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E05.mkv
+[3/20/2025, 12:13:34 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E11.mkv
+[3/20/2025, 12:13:34 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E10.mkv
+[3/20/2025, 12:13:34 AM] [LOG] Transcoding [Judas] Chainsaw Man - S01E04.mkv
+[3/20/2025, 12:13:34 AM] [LOG] Done transcoding!
+[3/20/2025, 12:13:34 AM] [LOG] Lock released: lockfile.lock
+[3/20/2025, 12:15:49 AM] [LOG] Lock acquired: lockfile.lock
+[3/20/2025, 12:15:49 AM] [LOG] Metadata and source found
+[3/20/2025, 12:15:49 AM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Okay-Subs] Chainsaw Man (BD 1080p)/ 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/20/2025, 12:15:49 AM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Okay-Subs] Chainsaw Man (BD 1080p)/ to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 12:16:18 AM] [VERBOSE] in transcodeVideos
+[3/20/2025, 12:16:19 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 02 (BD 1080p) [3E6D0AD4].mkv
+[3/20/2025, 12:16:19 AM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 12:16:19 AM] [LOG] Trying for best preset...
+[3/20/2025, 12:16:19 AM] [LOG] ATTEMPT 1, Trying for q: 17 and encoder: x265_10bit
+[3/20/2025, 12:17:02 AM] [LOG] New best bitrate: 2.0848186666666666 Mb/s (17 q)
+[3/20/2025, 12:17:02 AM] [LOG] ATTEMPT 2, Trying for q: 10 and encoder: x265_10bit
+[3/20/2025, 12:18:06 AM] [LOG] ATTEMPT 3, Trying for q: 14 and encoder: x265_10bit
+[3/20/2025, 12:18:06 AM] [LOG] Is HIGHER than allowed bitrate (8.317282933333335>3 or 12.432351582463465)Mb/s. Retrying. Estimated: 1497.110928 Mb (8.317282933333335 Mb/s)
+[3/20/2025, 12:18:58 AM] [LOG] ATTEMPT 4, Trying for q: 16 and encoder: x265_10bit
+[3/20/2025, 12:18:58 AM] [LOG] Is HIGHER than allowed bitrate (3.4131344>3 or 12.432351582463465)Mb/s. Retrying. Estimated: 614.364192 Mb (3.4131344 Mb/s)
+[3/20/2025, 12:19:49 AM] [LOG] New best bitrate: 2.430201333333333 Mb/s (16 q)
+[3/20/2025, 12:19:49 AM] [LOG] ATTEMPT 5, Trying for q: 15 and encoder: x265_10bit
+[3/20/2025, 12:20:42 AM] [LOG] New best bitrate: 2.8631159999999998 Mb/s (15 q)
+[3/20/2025, 12:20:42 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 07 (BD 1080p) [7E3AB55B].mkv
+[3/20/2025, 12:20:42 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 08 (BD 1080p) [6B30B2BE].mkv
+[3/20/2025, 12:20:42 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 05 (BD 1080p) [AD5A58EC].mkv
+[3/20/2025, 12:20:42 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 09 (BD 1080p) [66E334E7].mkv
+[3/20/2025, 12:20:42 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 06 (BD 1080p) [29A958D2].mkv
+[3/20/2025, 12:20:43 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 04 (BD 1080p) [87CE9C3E].mkv
+[3/20/2025, 12:20:43 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 01 (BD 1080p) [37C79E70].mkv
+[3/20/2025, 12:20:43 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 11 (BD 1080p) [62F5C1B3].mkv
+[3/20/2025, 12:20:43 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 03 (BD 1080p) [FC1899D7].mkv
+[3/20/2025, 12:20:43 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 12 (BD 1080p) [9C7D4E02].mkv
+[3/20/2025, 12:20:43 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 10 (BD 1080p) [1BCB1826].mkv
+[3/20/2025, 12:20:43 AM] [LOG] Done transcoding!
+[3/20/2025, 12:20:43 AM] [LOG] Lock released: lockfile.lock

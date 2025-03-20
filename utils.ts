@@ -83,14 +83,14 @@ export const getVideoMetadata = async (filePath: string) => {
       await $`ffprobe -v error -select_streams v:0 -show_entries stream=pix_fmt -of default=nokey=1:noprint_wrappers=1 ${filePath}`.text()
     ).trim();
     const size = Bun.file(filePath).size; // in bytes
-    const bitrate = Math.round((size * 8) / length / 1000 / 1000); // bitrs / length / 1000 / 1000 = Mb/s
+    const bitrate = (size * 8) / length / 1000 / 1000; // bitrs / length / 1000 / 1000 = Mb/s
     const extension = extname(filePath);
 
     const fileName = basename(filePath);
     const baseName = basename(filePath, extension);
     const dirPath = dirname(filePath);
 
-    const sizeInMB = Math.round(size / 1000 / 1000);
+    const sizeInMB = size / 1000 / 1000;
 
     const metadata: Metadata = {
       extension,
