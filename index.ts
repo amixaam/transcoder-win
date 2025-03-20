@@ -115,6 +115,11 @@ async function main() {
     await transcodeVideos(tempTorrentDir, jsonData.category);
     await transferFiles(tempTorrentDir, jsonData);
 
+    // remove temp directory and .json file
+    log(`Removing ${tempTorrentDir} and ${jsonPath}`, "LOG");
+    await $`rm -rf "${tempTorrentDir}"`;
+    await $`rm "${jsonPath}"`;
+
     await releaseLock();
   } catch (error) {
     log(`Error in main process: ${error}`, "ERROR");

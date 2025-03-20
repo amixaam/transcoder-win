@@ -13,4 +13,5 @@ export const transferFiles = async (
   } else {
     await $`scp -r "${absoluteDestinationDir}"/* ${TRANSFER_TO}:"${jsonData.media_output_directory}"`;
   }
+  log(`Transfer complete`, "LOG");
 };
