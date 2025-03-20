@@ -1,5 +1,5 @@
-import { readdir } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { readdir, rename, stat, unlink } from "node:fs/promises";
+import { basename, dirname, extname, join, resolve } from "node:path";
 import { getVideoMetadata, log, waitSleepHours, type Metadata } from "./utils";
 import { $ } from "bun";
 import { HwAccelType, NO_SUBTITLE_PRESET, SUBTITLE_PRESET } from "./consts";
@@ -19,6 +19,70 @@ const getBitrateRange = (category: string) => {
   else if (category.includes("shows")) return bitrateRanges.Shows;
   else return bitrateRanges.Movies;
 };
+
+async function processFiles(absoluteDestinationDir: string): Promise<void> {
+  const unsortedFiles = await readdir(absoluteDestinationDir, {
+    recursive: true,
+  });
+
+  for await (const filePath of unsortedFiles) {
+    const absoluteFilePath = join(absoluteDestinationDir, filePath);
+    const fileStat = await stat(absoluteFilePath);
+
+    if (fileStat.isDirectory()) {
+      continue; // Skip directories
+    }
+
+    const fileExtension = extname(filePath).toLowerCase();
+    const fileName = basename(filePath);
+
+    const validExtensions = [
+      ".mp4",
+      ".ass",
+      ".srt",
+      ".usf",
+      ".vtt",
+      ".sub",
+      ".sup",
+      ".textst",
+      ".dvb",
+    ];
+
+    if (!validExtensions.includes(fileExtension)) {
+      await unlink(absoluteFilePath);
+      console.log(`Deleted: ${absoluteFilePath} (invalid extension)`);
+      continue;
+    }
+
+    if (fileExtension === ".mp4" && !fileName.endsWith("_HBPROCESSED.mp4")) {
+      await unlink(absoluteFilePath);
+      console.log(`Deleted: ${absoluteFilePath} (not _HBPROCESSED.mp4)`);
+      continue;
+    }
+  }
+
+  const unrenamedFiles = await readdir(absoluteDestinationDir, {
+    recursive: true,
+  });
+
+  for await (const filePath of unrenamedFiles) {
+    const absoluteFilePath = join(absoluteDestinationDir, filePath);
+    const fileStat = await stat(absoluteFilePath);
+
+    if (fileStat.isDirectory()) {
+      continue; // Skip directories
+    }
+
+    const fileName = basename(filePath);
+
+    if (fileName.endsWith("_HBPROCESSED.mp4")) {
+      const newFileName = fileName.replace("_HBPROCESSED.mp4", ".mp4");
+      const newFilePath = join(absoluteDestinationDir, newFileName);
+      await rename(absoluteFilePath, newFilePath);
+      console.log(`Renamed: ${absoluteFilePath} to ${newFilePath}`);
+    }
+  }
+}
 
 // Transcodes first 30 seconds of video and predicts full size. Adjusts arguments accordingly.
 const getHandbrakeArgs = async (metadata: Metadata, mediaCategory: string) => {
@@ -191,8 +255,9 @@ export const transcodeVideos = async (
     }
   }
 
-  // remove every video file that isnt processed
+  // remove every video file that isnt processed & potential junk files
   // rename every processed video back to the original name
+  await processFiles(absoluteDestinationDir);
 
   log(`Done transcoding!`, "LOG");
 };
