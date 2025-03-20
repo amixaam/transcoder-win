@@ -2,6 +2,7 @@ import { readdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { getVideoMetadata, log, waitSleepHours, type Metadata } from "./utils";
 import { $ } from "bun";
+import { HwAccelType, NO_SUBTITLE_PRESET, SUBTITLE_PRESET } from "./consts";
 
 const typesToTranscode = ["mp4", "mkv", "avi", "mov", "flv", "webm"];
 const keepColorProfiles = ["yuv420p", "yuv444p"];
@@ -10,17 +11,13 @@ const keepColorProfiles = ["yuv420p", "yuv444p"];
 const bitrateRanges = {
   Anime: [1.3, 3],
   Shows: [2, 4],
-  Movies: [3, 5],
+  Movies: [3, 6],
 };
 
 const getBitrateRange = (category: string) => {
   if (category.includes("anime")) return bitrateRanges.Anime;
   else if (category.includes("shows")) return bitrateRanges.Shows;
   else return bitrateRanges.Movies;
-};
-
-const inRange = (value: number, range: number[]) => {
-  return value >= range[0]! && value <= range[1]!;
 };
 
 // Transcodes first 30 seconds of video and predicts full size. Adjusts arguments accordingly.
@@ -34,11 +31,16 @@ const getHandbrakeArgs = async (metadata: Metadata, mediaCategory: string) => {
   let estimatedSize = Infinity;
   let estimatedBitrate = 0;
 
-  const hwAccelType = "Toolbox";
+  let encoder = !keepColorProfiles.includes(metadata.colorProfile)
+    ? "x265_10bit"
+    : "x265";
 
-  let encoder = "x265";
-  if (!keepColorProfiles.includes(metadata.colorProfile))
-    encoder = "x265_10bit";
+  // chooses which preset to use
+  let preset =
+    metadata.extension == ".mkv" ? NO_SUBTITLE_PRESET : SUBTITLE_PRESET;
+
+  const presetFullPath = resolve(process.cwd(), "presets/", preset);
+  log(`Using preset: ${preset} (${presetFullPath})`, "LOG");
 
   let q_min = 3;
   let q_max = 30;
@@ -59,7 +61,6 @@ const getHandbrakeArgs = async (metadata: Metadata, mediaCategory: string) => {
       low = mid + 1;
       log(
         `Is HIGHER than source size (${estimatedSize} > ${metadata.size}). Retrying. Estimated: ${estimatedSize} MB (${estimatedBitrate} Mb/s)`,
-        "LOG",
       );
     } else if (
       estimatedBitrate >= metadata.bitrate ||
@@ -68,7 +69,6 @@ const getHandbrakeArgs = async (metadata: Metadata, mediaCategory: string) => {
       low = mid + 1;
       log(
         `Is HIGHER than allowed bitrate (${estimatedBitrate} > ${bitrateRange[1]!} or ${metadata.bitrate})Mb/s. Retrying. Estimated: ${estimatedSize} Mb (${estimatedBitrate} Mb/s)`,
-        "LOG",
       );
     } else if (estimatedBitrate <= bitrateRange[0]!) {
       high = mid - 1;
@@ -77,12 +77,10 @@ const getHandbrakeArgs = async (metadata: Metadata, mediaCategory: string) => {
         best_bitrate = estimatedBitrate;
         log(
           `Is LOWER than allowed bitrate, but is still New best bitrate: ${best_bitrate} Mb/s (${best_q} q)`,
-          "LOG",
         );
       } else {
         log(
           `Is LOWER than allowed bitrate (${estimatedBitrate} < ${bitrateRange[0]})Mb/s. Retrying. Estimated: ${estimatedBitrate} Mb/s (${estimatedBitrate} Mb/s)`,
-          "LOG",
         );
       }
     } else {
@@ -108,10 +106,9 @@ const getHandbrakeArgs = async (metadata: Metadata, mediaCategory: string) => {
   let i = 1;
   while (i < 7 || low <= high) {
     let startAtSeconds = 0;
-    log(`ATTEMPT ${i}, Trying for q: ${mid} and encoder: ${encoder}`, "LOG");
+    log(`ATTEMPT ${i}, Trying for q: ${mid} and preset: ${preset}`, "LOG");
 
-    // TODO: TEST OUT USING A PRESET WITH .MP4 AND OTHER. THIS CAN ALSO AFFECT VIDEO SIZE. TRY OVERWRITING Q PARAM
-    await $`HandBrakeCLI -i "${metadata.filePath}" -o "${dirname(metadata.filePath)}/${outputFileName}" --start-at seconds:${startAtSeconds} --stop-at seconds:${encodeForSeconds} -O --align-av -e ${encoder} -q ${mid} --enable-hw-decoding ${hwAccelType}`.quiet();
+    await $`HandBrakeCLI --preset-import-file "${presetFullPath}" -i "${metadata.filePath}" -o "${metadata.dirPath}/${outputFileName}" --start-at seconds:${startAtSeconds} --stop-at seconds:${encodeForSeconds} -e ${encoder} -q ${mid} --enable-hw-decoding ${HwAccelType}`.quiet();
 
     const processedMetadata = await getVideoMetadata(
       resolve(dirname(metadata.filePath), outputFileName),
@@ -127,6 +124,8 @@ const getHandbrakeArgs = async (metadata: Metadata, mediaCategory: string) => {
   if (best_q === null) {
     log(`No successful transcode attempts found. Using default`, "WARN");
   }
+
+  return best_q;
 };
 
 export const transcodeVideos = async (
@@ -136,6 +135,7 @@ export const transcodeVideos = async (
   const files = await readdir(absoluteDestinationDir, { recursive: true });
 
   let currentDirectory = "";
+  let q = null;
 
   log("in transcodeVideos", "VERBOSE");
 
@@ -168,11 +168,27 @@ export const transcodeVideos = async (
       currentDirectory = metadata.dirPath;
       log(`New base dir: ${currentDirectory}`, "VERBOSE");
       log(`Trying for best preset...`, "LOG");
-      await getHandbrakeArgs(metadata, mediaCategory);
+      q = await getHandbrakeArgs(metadata, mediaCategory);
     }
 
     // transcode video
-    // test out using a preset
+    const outputFileName =
+      metadata.fileName.split(".")[0]! + `_HBPROCESSED.mp4`;
+
+    let encoder = !keepColorProfiles.includes(metadata.colorProfile)
+      ? "x265_10bit"
+      : "x265";
+
+    let preset =
+      metadata.extension == ".mkv" ? NO_SUBTITLE_PRESET : SUBTITLE_PRESET;
+    const presetFullPath = resolve(process.cwd(), "presets/", preset);
+
+    // if q is null, use the preset's q value
+    if (q === null) {
+      await $`HandBrakeCLI --preset-import-file "${presetFullPath}" -i "${metadata.filePath}" -o "${metadata.dirPath}/${outputFileName}" -e ${encoder} --enable-hw-decoding ${HwAccelType}`.quiet();
+    } else {
+      await $`HandBrakeCLI --preset-import-file -q ${q} "${presetFullPath}" -i "${metadata.filePath}" -o "${metadata.dirPath}/${outputFileName}" -e ${encoder} --enable-hw-decoding ${HwAccelType}`.quiet();
+    }
   }
 
   // remove every video file that isnt processed

@@ -1802,3 +1802,151 @@
 [3/20/2025, 12:20:43 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 10 (BD 1080p) [1BCB1826].mkv
 [3/20/2025, 12:20:43 AM] [LOG] Done transcoding!
 [3/20/2025, 12:20:43 AM] [LOG] Lock released: lockfile.lock
+[3/20/2025, 9:22:14 AM] [LOG] Lock acquired: lockfile.lock
+[3/20/2025, 9:22:14 AM] [LOG] Metadata and source found
+[3/20/2025, 9:22:14 AM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Okay-Subs] Chainsaw Man (BD 1080p)/ 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/20/2025, 9:22:14 AM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Okay-Subs] Chainsaw Man (BD 1080p)/ to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 9:22:43 AM] [VERBOSE] in transcodeVideos
+[3/20/2025, 9:22:44 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 02 (BD 1080p) [3E6D0AD4].mkv
+[3/20/2025, 9:22:44 AM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 9:22:44 AM] [LOG] Trying for best preset...
+[3/20/2025, 9:22:44 AM] [LOG] ATTEMPT 1, Trying for q: 17 and encoder: x265_10bit
+[3/20/2025, 9:23:30 AM] [LOG] New best bitrate: 2.0848186666666666 Mb/s (17 q)
+[3/20/2025, 9:23:30 AM] [LOG] ATTEMPT 2, Trying for q: 10 and encoder: x265_10bit
+[3/20/2025, 9:24:39 AM] [LOG] Is HIGHER than allowed bitrate (8.317282933333335 > 3 or 12.432351582463465)Mb/s. Retrying. Estimated: 1497.110928 Mb (8.317282933333335 Mb/s)
+[3/20/2025, 9:24:39 AM] [LOG] ATTEMPT 3, Trying for q: 14 and encoder: x265_10bit
+[3/20/2025, 9:25:31 AM] [LOG] Is HIGHER than allowed bitrate (3.4131344 > 3 or 12.432351582463465)Mb/s. Retrying. Estimated: 614.364192 Mb (3.4131344 Mb/s)
+[3/20/2025, 9:25:31 AM] [LOG] ATTEMPT 4, Trying for q: 16 and encoder: x265_10bit
+[3/20/2025, 9:26:20 AM] [LOG] New best bitrate: 2.430201333333333 Mb/s (16 q)
+[3/20/2025, 9:26:20 AM] [LOG] ATTEMPT 5, Trying for q: 15 and encoder: x265_10bit
+[3/20/2025, 9:27:12 AM] [LOG] New best bitrate: 2.8631159999999998 Mb/s (15 q)
+[3/20/2025, 9:27:12 AM] [LOG] ATTEMPT 6, Trying for q: 15 and encoder: x265_10bit
+[3/20/2025, 9:28:06 AM] [LOG] New best bitrate: 2.8631159999999998 Mb/s (15 q)
+[3/20/2025, 9:28:06 AM] [LOG] Skipping transcoding of _HBPROCESSED file
+[3/20/2025, 9:28:06 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 07 (BD 1080p) [7E3AB55B].mkv
+[3/20/2025, 9:28:07 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 08 (BD 1080p) [6B30B2BE].mkv
+[3/20/2025, 9:28:07 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 05 (BD 1080p) [AD5A58EC].mkv
+[3/20/2025, 9:28:07 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 09 (BD 1080p) [66E334E7].mkv
+[3/20/2025, 9:28:07 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 06 (BD 1080p) [29A958D2].mkv
+[3/20/2025, 9:28:07 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 04 (BD 1080p) [87CE9C3E].mkv
+[3/20/2025, 9:28:07 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 01 (BD 1080p) [37C79E70].mkv
+[3/20/2025, 9:28:07 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 11 (BD 1080p) [62F5C1B3].mkv
+[3/20/2025, 9:28:07 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 03 (BD 1080p) [FC1899D7].mkv
+[3/20/2025, 9:28:08 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 12 (BD 1080p) [9C7D4E02].mkv
+[3/20/2025, 9:28:08 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 10 (BD 1080p) [1BCB1826].mkv
+[3/20/2025, 9:28:08 AM] [LOG] Done transcoding!
+[3/20/2025, 9:28:08 AM] [LOG] Lock released: lockfile.lock
+[3/20/2025, 9:50:37 AM] [LOG] Lock acquired: lockfile.lock
+[3/20/2025, 9:50:37 AM] [LOG] Metadata and source found
+[3/20/2025, 9:50:37 AM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Okay-Subs] Chainsaw Man (BD 1080p)/ 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/20/2025, 9:50:37 AM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Okay-Subs] Chainsaw Man (BD 1080p)/ to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 9:51:39 AM] [VERBOSE] in transcodeVideos
+[3/20/2025, 9:51:40 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 02 (BD 1080p) [3E6D0AD4].mkv
+[3/20/2025, 9:51:40 AM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 9:51:40 AM] [LOG] Trying for best preset...
+[3/20/2025, 9:51:40 AM] [LOG] ATTEMPT 1, Trying for q: 17 and encoder: x265_10bit
+[3/20/2025, 9:51:40 AM] [LOG] Using preset: ./presets/Toolbox 1080p Jellyfin-ready.json (/Users/robertsbrinkis/Documents/GitHub/transcoder-win/presets/presets/Toolbox 1080p Jellyfin-ready.json)
+[3/20/2025, 9:52:24 AM] [LOG] New best bitrate: 2.0845472 Mb/s (17 q)
+[3/20/2025, 9:52:24 AM] [LOG] ATTEMPT 2, Trying for q: 10 and encoder: x265_10bit
+[3/20/2025, 9:52:24 AM] [LOG] Using preset: ./presets/Toolbox 1080p Jellyfin-ready.json (/Users/robertsbrinkis/Documents/GitHub/transcoder-win/presets/presets/Toolbox 1080p Jellyfin-ready.json)
+[3/20/2025, 9:53:31 AM] [LOG] Is HIGHER than allowed bitrate (8.317011466666667 > 3 or 12.432351582463465)Mb/s. Retrying. Estimated: 1497.062064 Mb (8.317011466666667 Mb/s)
+[3/20/2025, 9:53:31 AM] [LOG] ATTEMPT 3, Trying for q: 14 and encoder: x265_10bit
+[3/20/2025, 9:53:31 AM] [LOG] Using preset: ./presets/Toolbox 1080p Jellyfin-ready.json (/Users/robertsbrinkis/Documents/GitHub/transcoder-win/presets/presets/Toolbox 1080p Jellyfin-ready.json)
+[3/20/2025, 9:54:00 AM] [WARN] Cleaning up before exit with code 0
+[3/20/2025, 9:54:02 AM] [LOG] Lock acquired: lockfile.lock
+[3/20/2025, 9:54:02 AM] [LOG] Metadata and source found
+[3/20/2025, 9:54:02 AM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Okay-Subs] Chainsaw Man (BD 1080p)/ 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/20/2025, 9:54:02 AM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Okay-Subs] Chainsaw Man (BD 1080p)/ to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 9:54:54 AM] [VERBOSE] in transcodeVideos
+[3/20/2025, 9:54:55 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 02 (BD 1080p) [3E6D0AD4].mkv
+[3/20/2025, 9:54:55 AM] [LOG] Trying for best preset...
+[3/20/2025, 9:54:55 AM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 9:54:55 AM] [LOG] ATTEMPT 1, Trying for q: 17 and encoder: x265_10bit
+[3/20/2025, 9:54:55 AM] [LOG] Using preset: ./presets/Toolbox 1080p Jellyfin-ready.json (/Users/robertsbrinkis/Documents/GitHub/transcoder-win/presets/presets/Toolbox 1080p Jellyfin-ready.json)
+[3/20/2025, 9:55:03 AM] [WARN] Cleaning up before exit with code 0
+[3/20/2025, 9:55:03 AM] [LOG] Lock released: lockfile.lock
+[3/20/2025, 9:55:03 AM] [LOG] Cleanup complete
+[3/20/2025, 9:56:18 AM] [LOG] Lock acquired: lockfile.lock
+[3/20/2025, 9:56:18 AM] [LOG] Metadata and source found
+[3/20/2025, 9:56:18 AM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Okay-Subs] Chainsaw Man (BD 1080p)/ 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/20/2025, 9:56:18 AM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Okay-Subs] Chainsaw Man (BD 1080p)/ to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 9:57:05 AM] [VERBOSE] in transcodeVideos
+[3/20/2025, 9:57:06 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 02 (BD 1080p) [3E6D0AD4].mkv
+[3/20/2025, 9:57:06 AM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 9:57:06 AM] [LOG] Trying for best preset...
+[3/20/2025, 9:57:06 AM] [LOG] ATTEMPT 1, Trying for q: 17 and encoder: x265_10bit
+[3/20/2025, 9:57:06 AM] [LOG] .mkv
+[3/20/2025, 9:57:06 AM] [LOG] Using preset: ./presets/Toolbox 1080p Jellyfin-ready.json (/Users/robertsbrinkis/Documents/GitHub/transcoder-win/presets/presets/Toolbox 1080p Jellyfin-ready.json)
+[3/20/2025, 9:57:08 AM] [WARN] Cleaning up before exit with code 0
+[3/20/2025, 9:57:08 AM] [LOG] Lock released: lockfile.lock
+[3/20/2025, 9:57:08 AM] [LOG] Cleanup complete
+[3/20/2025, 9:57:51 AM] [LOG] Lock acquired: lockfile.lock
+[3/20/2025, 9:57:51 AM] [LOG] Metadata and source found
+[3/20/2025, 9:57:51 AM] [VERBOSE] 
+ FULLPATH: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media 
+ JSONPATH: metadata/Chainsaw Man.json 
+ SOURCE_DIR: /Users/robertsbrinkis/Downloads/[Okay-Subs] Chainsaw Man (BD 1080p)/ 
+ TEMPTORRENTDIR: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man 
+ SOURCETYPE: directory 
+ CWD: /Users/robertsbrinkis/Documents/GitHub/transcoder-win
+[3/20/2025, 9:57:51 AM] [LOG] Moving /Users/robertsbrinkis/Downloads/[Okay-Subs] Chainsaw Man (BD 1080p)/ to /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 9:58:35 AM] [VERBOSE] in transcodeVideos
+[3/20/2025, 9:58:36 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 02 (BD 1080p) [3E6D0AD4].mkv
+[3/20/2025, 9:58:36 AM] [VERBOSE] New base dir: /Users/robertsbrinkis/Documents/GitHub/transcoder-win/temp_media/Chainsaw Man
+[3/20/2025, 9:58:36 AM] [LOG] Trying for best preset...
+[3/20/2025, 9:58:36 AM] [LOG] ATTEMPT 1, Trying for q: 17 and encoder: x265_10bit
+[3/20/2025, 9:58:36 AM] [LOG] Using preset: ./presets/Toolbox 1080p Jellyfin-ready [no subs].json (/Users/robertsbrinkis/Documents/GitHub/transcoder-win/presets/presets/Toolbox 1080p Jellyfin-ready [no subs].json)
+[3/20/2025, 9:59:23 AM] [LOG] New best bitrate: 2.0845472 Mb/s (17 q)
+[3/20/2025, 9:59:23 AM] [LOG] ATTEMPT 2, Trying for q: 10 and encoder: x265_10bit
+[3/20/2025, 9:59:23 AM] [LOG] Using preset: ./presets/Toolbox 1080p Jellyfin-ready [no subs].json (/Users/robertsbrinkis/Documents/GitHub/transcoder-win/presets/presets/Toolbox 1080p Jellyfin-ready [no subs].json)
+[3/20/2025, 10:00:32 AM] [LOG] Is HIGHER than allowed bitrate (8.317011466666667 > 3 or 12.432351582463465)Mb/s. Retrying. Estimated: 1497.062064 Mb (8.317011466666667 Mb/s)
+[3/20/2025, 10:00:32 AM] [LOG] ATTEMPT 3, Trying for q: 14 and encoder: x265_10bit
+[3/20/2025, 10:00:32 AM] [LOG] Using preset: ./presets/Toolbox 1080p Jellyfin-ready [no subs].json (/Users/robertsbrinkis/Documents/GitHub/transcoder-win/presets/presets/Toolbox 1080p Jellyfin-ready [no subs].json)
+[3/20/2025, 10:01:27 AM] [LOG] Is HIGHER than allowed bitrate (3.4128629333333333 > 3 or 12.432351582463465)Mb/s. Retrying. Estimated: 614.315328 Mb (3.4128629333333333 Mb/s)
+[3/20/2025, 10:01:27 AM] [LOG] Using preset: ./presets/Toolbox 1080p Jellyfin-ready [no subs].json (/Users/robertsbrinkis/Documents/GitHub/transcoder-win/presets/presets/Toolbox 1080p Jellyfin-ready [no subs].json)
+[3/20/2025, 10:01:27 AM] [LOG] ATTEMPT 4, Trying for q: 16 and encoder: x265_10bit
+[3/20/2025, 10:02:18 AM] [LOG] New best bitrate: 2.429929866666667 Mb/s (16 q)
+[3/20/2025, 10:02:18 AM] [LOG] ATTEMPT 5, Trying for q: 15 and encoder: x265_10bit
+[3/20/2025, 10:02:18 AM] [LOG] Using preset: ./presets/Toolbox 1080p Jellyfin-ready [no subs].json (/Users/robertsbrinkis/Documents/GitHub/transcoder-win/presets/presets/Toolbox 1080p Jellyfin-ready [no subs].json)
+[3/20/2025, 10:03:11 AM] [LOG] New best bitrate: 2.8628445333333334 Mb/s (15 q)
+[3/20/2025, 10:03:11 AM] [LOG] ATTEMPT 6, Trying for q: 15 and encoder: x265_10bit
+[3/20/2025, 10:03:11 AM] [LOG] Using preset: ./presets/Toolbox 1080p Jellyfin-ready [no subs].json (/Users/robertsbrinkis/Documents/GitHub/transcoder-win/presets/presets/Toolbox 1080p Jellyfin-ready [no subs].json)
+[3/20/2025, 10:04:05 AM] [LOG] New best bitrate: 2.8628445333333334 Mb/s (15 q)
+[3/20/2025, 10:04:05 AM] [LOG] Skipping transcoding of _HBPROCESSED file
+[3/20/2025, 10:04:05 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 07 (BD 1080p) [7E3AB55B].mkv
+[3/20/2025, 10:04:05 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 08 (BD 1080p) [6B30B2BE].mkv
+[3/20/2025, 10:04:05 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 05 (BD 1080p) [AD5A58EC].mkv
+[3/20/2025, 10:04:05 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 09 (BD 1080p) [66E334E7].mkv
+[3/20/2025, 10:04:05 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 06 (BD 1080p) [29A958D2].mkv
+[3/20/2025, 10:04:06 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 04 (BD 1080p) [87CE9C3E].mkv
+[3/20/2025, 10:04:06 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 01 (BD 1080p) [37C79E70].mkv
+[3/20/2025, 10:04:06 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 11 (BD 1080p) [62F5C1B3].mkv
+[3/20/2025, 10:04:06 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 03 (BD 1080p) [FC1899D7].mkv
+[3/20/2025, 10:04:06 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 12 (BD 1080p) [9C7D4E02].mkv
+[3/20/2025, 10:04:06 AM] [LOG] Transcoding [Okay-Subs] Chainsaw Man - 10 (BD 1080p) [1BCB1826].mkv
+[3/20/2025, 10:04:06 AM] [LOG] Done transcoding!
+[3/20/2025, 10:04:06 AM] [LOG] Lock released: lockfile.lock
