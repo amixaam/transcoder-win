@@ -5,7 +5,7 @@ export const TEMP_DIR = "./temp_media/";
 export const SUBTITLE_PRESET = "./presets/Toolbox 1080p Jellyfin-ready.json";
 export const NO_SUBTITLE_PRESET =
   "./presets/Toolbox 1080p Jellyfin-ready [no subs].json";
-export const HwAccelType = "Toolbox";
+export const HwAccelType = "vcn";
 
 export const VERBOSE = true;
 

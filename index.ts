@@ -74,6 +74,11 @@ async function main() {
     };
     const { TORRENT_NAME, SOURCE_DIR } = getArgs();
 
+    const wslPath = await $`cmd.exe /C wsl wslpath "${SOURCE_DIR}"`.text();
+
+    log(`WSL PATH: ${wslPath}`, "VERBOSE");
+    return;
+
     // check if .json exists
     const jsonPath = join(METADATA_DIR, `${TORRENT_NAME}.json`);
     const json = Bun.file(jsonPath);
@@ -84,12 +89,12 @@ async function main() {
     const jsonData: JSONMetadata = JSON.parse(await json.text());
 
     // find out it SOURCE_DIR is a directory or file
-    const fileExists = await Bun.file(SOURCE_DIR).exists();
+    const fileExists = await Bun.file(wslPath).exists();
     let sourceType: fileType = "file";
 
     if (!fileExists) {
       // if fails to read dir, then doesent exist
-      await readdir(SOURCE_DIR, { recursive: true });
+      await readdir(wslPath, { recursive: true });
       sourceType = "directory";
     }
 
@@ -98,17 +103,17 @@ async function main() {
     const fullPath = join(process.cwd(), "temp_media");
     const tempTorrentDir = join(fullPath, TORRENT_NAME);
     log(
-      `\n FULLPATH: ${fullPath} \n JSONPATH: ${jsonPath} \n SOURCE_DIR: ${SOURCE_DIR} \n TEMPTORRENTDIR: ${tempTorrentDir} \n SOURCETYPE: ${sourceType} \n CWD: ${process.cwd()}`,
+      `\n FULLPATH: ${fullPath} \n JSONPATH: ${jsonPath} \n SOURCE_DIR: ${wslPath} \n TEMPTORRENTDIR: ${tempTorrentDir} \n SOURCETYPE: ${sourceType} \n CWD: ${process.cwd()}`,
       "VERBOSE",
     );
 
     await mkdir(tempTorrentDir, { recursive: true });
 
-    log(`Moving ${SOURCE_DIR} to ${tempTorrentDir}`, "LOG");
+    log(`Moving ${wslPath} to ${tempTorrentDir}`, "LOG");
     if (sourceType === "file") {
-      await $`cp "${SOURCE_DIR}" "${tempTorrentDir}"`;
+      await $`cp "${wslPath}" "${tempTorrentDir}"`;
     } else {
-      await $`cp -R "${SOURCE_DIR}/" "${tempTorrentDir}"`;
+      await $`cp -R "${wslPath}/" "${tempTorrentDir}"`;
     }
 
     await exportSubtitles(tempTorrentDir);
