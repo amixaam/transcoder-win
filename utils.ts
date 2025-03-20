@@ -7,7 +7,7 @@ import { $ } from "bun";
 export interface JSONMetadata {
   media_output_directory: string;
   json_output_directory: string;
-  torrent_type: string;
+  torrent_type: "new" | "episode" | "season";
   category: string;
   hash: string;
   name: string;

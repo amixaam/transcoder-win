@@ -205,7 +205,7 @@ export const transcodeVideos = async (
 
   for await (const file of files) {
     if (!typesToTranscode.includes(file.split(".").pop()!)) continue;
-    // await waitSleepHours();
+    await waitSleepHours();
 
     const metadata = await getVideoMetadata(
       resolve(absoluteDestinationDir, file),

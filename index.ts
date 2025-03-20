@@ -12,6 +12,7 @@ import {
 } from "./utils";
 import { exportSubtitles } from "./export-subs";
 import { transcodeVideos } from "./transcode-videos";
+import { transferFiles } from "./transfer-files";
 // USAGE: bun run index.ts {torrent_name} {source_dir}
 // EXAMPLE: bun run index.ts "SAKAMOTO.DAYS.S01.[DB]" "D:/TORRENT/TEMP/SAKAMOTO DAYS S01 [DB]"
 
@@ -59,7 +60,7 @@ type fileType = "file" | "directory";
 async function main() {
   try {
     await acquireLock();
-    // await waitSleepHours();
+    await waitSleepHours();
 
     const getArgs = () => {
       const args = Bun.argv;
@@ -110,9 +111,9 @@ async function main() {
       await $`cp -R "${SOURCE_DIR}/" "${tempTorrentDir}"`;
     }
 
-    // await exportSubtitles(tempTorrentDir);
-
+    await exportSubtitles(tempTorrentDir);
     await transcodeVideos(tempTorrentDir, jsonData.category);
+    await transferFiles(tempTorrentDir, jsonData);
 
     await releaseLock();
   } catch (error) {
