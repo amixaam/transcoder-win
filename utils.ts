@@ -1,8 +1,8 @@
-import { appendFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
-import { LOCK_FILE, VERBOSE } from "./consts";
-import { dirname, extname, basename, normalize, relative } from "node:path";
 import { $ } from "bun";
+import { existsSync } from "node:fs";
+import { appendFile, readdir, stat } from "node:fs/promises";
+import { basename, dirname, extname, join } from "node:path";
+import { DEVELOPMENT, LOCK_FILE, LOG_FILE, VERBOSE } from "./consts";
 
 export interface JSONMetadata {
   media_output_directory: string;
@@ -69,7 +69,104 @@ export interface Metadata {
    * @property {string} baseName - The name of the video file without the extension.
    */
   baseName: string;
+  /**
+   * @property {string} windowsFilePath - The full path to the video file on Windows.
+   */
+  windowsFilePath: string;
+  /**
+   * @property {string} windowsDirPath - The path to the directory containing the video file on Windows.
+   */
+  windowsDirPath: string;
 }
+
+export async function getDirectorySize(directoryPath: string): Promise<number> {
+  let totalSize = 0;
+
+  try {
+    const items = await readdir(directoryPath);
+
+    for (const item of items) {
+      const itemPath = join(directoryPath, item);
+      const stats = await stat(itemPath);
+
+      if (stats.isDirectory()) {
+        totalSize += await getDirectorySize(itemPath);
+      } else if (stats.isFile()) {
+        totalSize += stats.size;
+      }
+    }
+
+    return totalSize;
+  } catch (error) {
+    log(
+      `Error calculating directory size for ${directoryPath}: ${error}`,
+      "ERROR"
+    );
+    return 0;
+  }
+}
+
+export function formatBytes(bytes: number): string {
+  if (bytes === 0) return "0 Bytes";
+
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+
+// Handle paths like /mnt/d/Games/... => D:\Games\...
+// Handle paths like /home/roberts/... => \\wsl.localhost\Ubuntu-24.04\home\roberts\...
+export const wslToWin = (wslPath: string): string => {
+  // Handle empty path
+  if (!wslPath) {
+    return "";
+  }
+
+  // Handle /mnt/DRIVE/path => DRIVE:\path
+  const driveMatch = wslPath.match(/^\/mnt\/([a-zA-Z])(.*)$/);
+  if (driveMatch) {
+    const [, drive, rest] = driveMatch;
+    return `${drive!.toUpperCase()}:${rest!.replace(/\//g, "\\")}`;
+  }
+
+  // Handle Linux paths like /home/user/... => \\wsl.localhost\DISTRO\home\user\...
+  if (wslPath.startsWith("/")) {
+    // Assume Ubuntu-24.04 as the default distro
+    const distro = "Ubuntu-24.04";
+    return `\\\\wsl.localhost\\${distro}${wslPath.replace(/\//g, "\\")}`;
+  }
+
+  // Return original path if it doesn't match any pattern
+  return wslPath;
+};
+
+// Handle paths like D:\Games\... => /mnt/d/Games/...
+// Handle paths like \\wsl.localhost\Ubuntu-24.04\home\roberts\... => /home/roberts/...
+export const winToWsl = (winPath: string): string => {
+  // Handle empty path
+  if (!winPath) {
+    return "";
+  }
+
+  // Handle DRIVE:\path => /mnt/DRIVE/path
+  const driveMatch = winPath.match(/^([a-zA-Z]):(.*)$/);
+  if (driveMatch) {
+    const [, drive, rest] = driveMatch;
+    return `/mnt/${drive!.toLowerCase()}${rest!.replace(/\\/g, "/")}`;
+  }
+
+  // Handle UNC WSL paths \\wsl.localhost\DISTRO\path => /path
+  const wslUncMatch = winPath.match(/^\\\\wsl\.localhost\\([^\\]+)(.*)$/);
+  if (wslUncMatch) {
+    const [, , path] = wslUncMatch;
+    return path!.replace(/\\/g, "/");
+  }
+
+  // Return original path if it doesn't match any pattern
+  return winPath;
+};
 
 export const getVideoMetadata = async (filePath: string) => {
   try {
@@ -77,7 +174,7 @@ export const getVideoMetadata = async (filePath: string) => {
       await $`ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=nokey=1:noprint_wrappers=1 "${filePath}"`.text()
     ).trim();
     const length = parseInt(
-      await $`ffprobe -v quiet -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`.text(),
+      await $`ffprobe -v quiet -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`.text()
     );
     const colorProfile = (
       await $`ffprobe -v error -select_streams v:0 -show_entries stream=pix_fmt -of default=nokey=1:noprint_wrappers=1 ${filePath}`.text()
@@ -92,6 +189,9 @@ export const getVideoMetadata = async (filePath: string) => {
 
     const sizeInMB = size / 1000 / 1000;
 
+    const windowsFilePath = winToWsl(filePath);
+    const windowsDirPath = winToWsl(dirPath);
+
     const metadata: Metadata = {
       extension,
       codec,
@@ -103,6 +203,8 @@ export const getVideoMetadata = async (filePath: string) => {
       dirPath,
       fileName,
       baseName,
+      windowsFilePath,
+      windowsDirPath,
     };
 
     return metadata;
@@ -116,6 +218,11 @@ export const waitSleepHours = async () => {
   const currentTime = new Date();
   const currentHour = currentTime.getHours();
   const currentMinutes = currentTime.getMinutes();
+
+  if (DEVELOPMENT) {
+    log(`Development: Overwriting sleep timer`, "VERBOSE");
+    return;
+  }
 
   if (
     currentHour >= 23 ||
@@ -141,18 +248,41 @@ export const waitSleepHours = async () => {
   }
 };
 
+export const getPerformance = (startTime: number) => {
+  const elapsedSeconds = (performance.now() - startTime) / 1000;
+  const hours = Math.floor(elapsedSeconds / 3600);
+  const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+  const seconds = Math.floor(elapsedSeconds % 60);
+  const timeString = `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+
+  return timeString;
+};
+
 export const log = async (
   message: string,
-  tag: "LOG" | "WARN" | "ERROR" | "VERBOSE" = "LOG",
+  tag: "LOG" | "WARN" | "ERROR" | "VERBOSE" = "LOG"
 ) => {
   if (!VERBOSE && tag === "VERBOSE") return;
 
-  const currentTime = new Date();
-  const formattedMessage = `[${currentTime.toLocaleString()}] [${tag}] ${message}\n`;
+  const yellow = "\x1b[33m";
+  const green = "\x1b[32m";
+  const red = "\x1b[31m";
+  const reset = "\x1b[0m";
 
-  console.log(formattedMessage.trim());
+  let tagColor = yellow;
+  if (tag === "LOG") tagColor = green;
+  else if (tag === "WARN") tagColor = yellow;
+  else if (tag === "ERROR") tagColor = red;
+
+  const currentTime = new Date();
+  const formattedMessageConsole = `[${green}${currentTime.toLocaleString()}${reset}] [${tagColor}${tag}${reset}] ${message}\n`;
+  const formattedMessageFile = `[${currentTime.toLocaleString()}] [${tag}] ${message}\n`;
+
+  console.log(formattedMessageConsole.trim());
   try {
-    await appendFile("transcoder-win.log", formattedMessage);
+    await appendFile(LOG_FILE, formattedMessageFile);
   } catch (error) {
     console.error("Error writing to log file:", error);
   }
@@ -201,4 +331,40 @@ export const releaseLock = async (): Promise<boolean> => {
     log(`Error releasing lock: ${error}`, "ERROR");
     return false;
   }
+};
+
+export function sanitizeFilename(filename: string): string {
+  // Remove or replace characters that are problematic in both Windows and Linux
+  let sanitized = filename.replace(/[/\\?%*:|"<>]/g, "-"); // Replace with -
+
+  // Remove characters that are problematic in Windows
+  sanitized = sanitized.replace(/[<>:"/\\|?*\x00-\x1F]/g, "-");
+
+  // Remove control characters and reserved names in Windows
+  sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, "-"); // Control characters
+  sanitized = sanitized.replace(
+    /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i,
+    "-"
+  ); // Reserved names
+
+  // Remove or trim leading and trailing spaces
+  sanitized = sanitized.trim();
+
+  // Replace multiple spaces with a single space
+  sanitized = sanitized.replace(/\s+/g, " ");
+
+  // Limit the filename length to avoid issues with older systems
+  const maxLength = 255;
+  if (sanitized.length > maxLength) {
+    sanitized = sanitized.substring(0, maxLength);
+  }
+
+  return sanitized;
+}
+
+export const clearTags = (dirName: string) => {
+  let sanitized = dirName.replace(/\[(.*?)\]/g, "");
+  sanitized = sanitized.replace(" ", "");
+  sanitized = sanitized.trim();
+  return sanitized;
 };

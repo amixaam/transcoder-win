@@ -1,22 +1,16 @@
 import { $ } from "bun";
 import { readdir } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { log } from "./utils";
+import { basename, dirname, extname, resolve } from "node:path";
+import { KEEP_LANGUAGE_CODES } from "./consts";
+import { log, sanitizeFilename } from "./utils";
+
+// script which extracts subtitles from .mkv files
 
 interface Track {
   id?: number;
   codec?: string;
   language?: string;
   name?: string;
-}
-
-function sanitizeFilename(name: string) {
-  return name
-    .replace(/[<>:"\/\\|?*\x00-\x1F]/g, "_") // Replace illegal chars with underscore
-    .replace(/\s+/g, " ") // Normalize whitespace
-    .replace(/^\.+/g, "_") // Replace leading dots
-    .replace(/\.+$/g, "_") // Replace trailing dots
-    .trim(); // Remove extra whitespace
 }
 
 function getSubtitleExtension(codec: string) {
@@ -47,24 +41,6 @@ function getSubtitleExtension(codec: string) {
   }
 }
 
-// english, japanese, russian, latvian, signs & songs, undefined
-const languageCodes = [
-  "en",
-  "eng",
-  "eng",
-  "ja",
-  "jpn",
-  "jpn",
-  "ru",
-  "rus",
-  "rus",
-  "lv",
-  "lav",
-  "lav",
-  "zxx",
-  "und",
-];
-
 export const exportSubtitles = async (absoluteDestinationDir: string) => {
   const files = await readdir(absoluteDestinationDir, { recursive: true });
 
@@ -79,7 +55,7 @@ export const exportSubtitles = async (absoluteDestinationDir: string) => {
 
     // get subtitle info from file
     console.log(`Exporting subtitles for ${file}`);
-    for await (const line of $`mkvinfo "${fullPath}"`.lines()) {
+    for await (const line of $`mkvinfo "${fullPath}"`.quiet().lines()) {
       const trimmedLine = line.trim();
       // Start new track
       if (trimmedLine.endsWith("+ Track")) {
@@ -96,7 +72,7 @@ export const exportSubtitles = async (absoluteDestinationDir: string) => {
 
       if (trimmedLine.includes("Track number:")) {
         const match = trimmedLine.match(
-          /track ID for mkvmerge & mkvextract: (\d+)/,
+          /track ID for mkvmerge & mkvextract: (\d+)/
         );
         if (match) currentTrack.id = parseInt(match[1]!);
         continue;
@@ -114,7 +90,7 @@ export const exportSubtitles = async (absoluteDestinationDir: string) => {
           .split("+ Language (IETF BCP 47):")[1]!
           .trim();
         currentTrack.language = language;
-        if (!languageCodes.includes(language)) inTrack = false;
+        if (!KEEP_LANGUAGE_CODES.includes(language)) inTrack = false;
         continue;
       } else if (trimmedLine.includes("+ Name:")) {
         const name = trimmedLine.split("+ Name:")[1]!.trim();
@@ -131,20 +107,17 @@ export const exportSubtitles = async (absoluteDestinationDir: string) => {
     for (const track of subtitleTracks) {
       const extension = getSubtitleExtension(track.codec as string);
       const name = sanitizeFilename(
-        track.name || `Track${(track.id as number).toString()}`,
+        track.name || `Track${(track.id as number).toString()}`
       );
 
       // Extract just the base name without the extension
-      const baseFileName = file
-        .replace(/\.mkv$/i, "")
-        .split("/")
-        .pop()!;
+      const baseFileName = basename(file, extname(file));
 
       const outputFile = `${baseFileName}.${name}.${track.language}.${extension}`;
       const outputPath = resolve(fileDir, outputFile);
 
       // extract subtitles
-      await $`mkvextract tracks ${fullPath} ${track.id}:"${outputPath}"`;
+      await $`mkvextract tracks ${fullPath} ${track.id}:"${outputPath}"`.quiet();
     }
   });
 };

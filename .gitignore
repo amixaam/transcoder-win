@@ -37,3 +37,4 @@ presets/*
 temp_media/*
 metadata/*
 transcoder-win.log
+lockfile.lock
