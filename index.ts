@@ -1,5 +1,5 @@
 import { $ } from "bun";
-import { mkdir, readdir, stat } from "node:fs/promises";
+import { mkdir, stat } from "node:fs/promises";
 import { basename, extname, join, resolve } from "node:path";
 import { exit } from "node:process";
 import { DEVELOPMENT, METADATA_DIR, TEMP_DIR } from "./consts";
@@ -92,7 +92,7 @@ async function main() {
     const { TORRENT_NAME, SOURCE_DIR } = getArgs();
     log(
       `\n[INPUT] torrent name: ${TORRENT_NAME} \n[INPUT] source dir: ${SOURCE_DIR}`,
-      "VERBOSE",
+      "VERBOSE"
     );
 
     // check if source exists
@@ -102,28 +102,35 @@ async function main() {
     }
 
     // check if json exists and read it
-    const jsonPath = resolve(METADATA_DIR, `${TORRENT_NAME}.json`);
+    const jsonPath = resolve(
+      METADATA_DIR,
+      `${sanitizeFilename(TORRENT_NAME)}.json`
+    );
 
     const { data: metadata, error: jsonError } = await tryCatch<JSONMetadata>(
-      readJsonFile(jsonPath),
+      readJsonFile(jsonPath)
     );
     if (jsonError) {
       return log(
         `Metadata file for ${TORRENT_NAME} not found: ${jsonError}`,
-        "ERROR",
+        "ERROR"
       );
     }
 
-    let tempDir = new GenericFile(clearTags(join(TEMP_DIR, TORRENT_NAME)));
+    let cleanTorrentName = sanitizeFilename(TORRENT_NAME);
+    cleanTorrentName = clearTags(cleanTorrentName);
+
+    let tempDir = new GenericFile(join(TEMP_DIR, cleanTorrentName));
 
     if ((await source.fileType()) === "file") {
       const torrentBasename = basename(TORRENT_NAME, extname(TORRENT_NAME));
-      tempDir = new GenericFile(clearTags(join(TEMP_DIR, torrentBasename)));
+      const cleanBasename = sanitizeFilename(clearTags(torrentBasename));
+      tempDir = new GenericFile(join(TEMP_DIR, cleanBasename));
     }
 
     log(
       `\n JSONPATH: ${jsonPath} \n SOURCE_DIR: ${source.unixPath} \n TEMPTORRENTDIR: ${tempDir.unixPath}`,
-      "VERBOSE",
+      "VERBOSE"
     );
 
     // copy source files to temp directory
@@ -139,26 +146,43 @@ async function main() {
     };
 
     const { data: _, error: tempError } = await tryCatch(
-      stat(tempDir.unixPath),
+      stat(tempDir.unixPath)
     );
     if (tempError || !DEVELOPMENT) {
-      copyToTempDir();
+      log(`Error checking temp directory, creating it: ${tempError}`, "WARN");
+
+      const { data: _, error: copyError } = await tryCatch(copyToTempDir());
+      if (copyError) {
+        log(`Error copying files: ${copyError}`, "ERROR");
+        throw copyError;
+      }
     }
 
+    Bun.sleep(1000);
     const originalMetadata = await tempDir.getDetails();
 
     await exportSubtitles(tempDir.unixPath);
     Bun.sleep(2000);
     await transcodeVideos(tempDir.unixPath, metadata.category);
     Bun.sleep(2000);
-    await transferFiles(tempDir.unixPath, metadata);
+    // await transferFiles(tempDir.unixPath, metadata);
 
     const newMetadata = await tempDir.getDetails();
 
     // remove temp directory and .json file
     log(`Removing ${tempDir.unixPath} and ${jsonPath}`);
-    await $`rm -rf "${tempDir.unixPath}"`;
-    await $`rm "${jsonPath}"`;
+    try {
+      await $`rm -rf "${tempDir.unixPath}"`;
+
+      const jsonFile = Bun.file(jsonPath);
+      if (await jsonFile.exists()) {
+        await $`rm "${jsonPath}"`;
+      } else {
+        log(`JSON file ${jsonPath} not found for removal`, "WARN");
+      }
+    } catch (error) {
+      log(`Error removing directory or JSON file: ${error}`, "ERROR");
+    }
 
     log(`SCRIPT FINISHED! Completed in ${getPerformance(now)}`);
 
@@ -173,18 +197,22 @@ async function main() {
     if (sizeDifference > 0) {
       log(
         `Size stats: \nOriginal: ${formatBytes(
-          originalMetadata.size,
-        )} \nNew: ${formatBytes(newMetadata.size)} \nSize Difference: ${formatBytes(
-          sizeDifference,
-        )} \nPercent Change: ${percentChange}% smaller \n`,
+          originalMetadata.size
+        )} \nNew: ${formatBytes(
+          newMetadata.size
+        )} \nSize Difference: ${formatBytes(
+          sizeDifference
+        )} \nPercent Change: ${percentChange}% smaller \n`
       );
     } else {
       log(
         `Size stats: \n Original: ${formatBytes(
-          originalMetadata.size,
-        )} \n New: ${formatBytes(newMetadata.size)} \n Size Difference: ${formatBytes(
-          Math.abs(sizeDifference),
-        )} \n Percent Change: ${Math.abs(Number(percentChange))}% larger \n`,
+          originalMetadata.size
+        )} \n New: ${formatBytes(
+          newMetadata.size
+        )} \n Size Difference: ${formatBytes(
+          Math.abs(sizeDifference)
+        )} \n Percent Change: ${Math.abs(Number(percentChange))}% larger \n`
       );
     }
 

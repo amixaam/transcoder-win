@@ -1,15 +1,11 @@
 import { basename, extname, dirname } from "node:path";
-import { getDirectorySize, log, winToWsl } from "../utils";
+import { getDirectorySize, log, winToWsl, wslToWin } from "../utils";
 import { tryCatch } from "./try-catch";
-
-// @ts-ignore
-import ffprobe, { type FFProbeResult } from "ffprobe";
-// @ts-ignore
-import ffprobeStatic from "ffprobe-static";
+import { $ } from "bun";
 import { stat } from "node:fs/promises";
-import type { Stats } from "node:fs";
 
 export type SourcePath = "win32" | "unix";
+export type SourceStyle = "win32" | "unix";
 export type FileType = "file" | "directory";
 
 export type ColorProfile =
@@ -32,7 +28,8 @@ export type Metadata = GenericMetadata & {
 };
 
 abstract class File {
-  sourcePath: SourcePath;
+  sourcePath: SourcePath; // which OS is the path from
+  sourceStyle: SourceStyle; // which OS can use the path
   unixPath: string; // /mnt/c/videos/video.mp4
   winPath: string; // C:\videos\video.mp4
   dirPath: string; // /mnt/c/videos
@@ -42,14 +39,23 @@ abstract class File {
   extension: string; // .mp4
 
   constructor(absolutePath: string) {
-    this.sourcePath = getPathOrigin(absolutePath);
-    const isWin = this.sourcePath === "win32";
+    const cleanAbsolutePath = absolutePath.replace(/^['"]|['"]$/g, "");
+    const { origin, style } = getPathOrigin(cleanAbsolutePath);
+    this.sourcePath = origin;
+    this.sourceStyle = style;
 
-    this.winPath = isWin ? absolutePath : winToWsl(absolutePath);
-    this.unixPath = isWin ? winToWsl(absolutePath) : absolutePath;
+    if (style === "win32") {
+      // If the path is already in Windows format
+      this.winPath = cleanAbsolutePath;
+      this.unixPath = winToWsl(cleanAbsolutePath);
+    } else {
+      // If the path is in Unix format
+      this.unixPath = cleanAbsolutePath;
+      this.winPath = wslToWin(cleanAbsolutePath);
+    }
 
     this.dirPath = dirname(this.unixPath);
-    this.name = basename(absolutePath);
+    this.name = basename(cleanAbsolutePath);
     this.extension = extname(this.name);
     this.base = basename(this.name, this.extension);
   }
@@ -81,10 +87,10 @@ export class GenericFile extends File {
   }
   getDetails = async (): Promise<GenericMetadata | undefined> => {
     const { data: fileType, error: fileError } = await tryCatch<FileType>(
-      this.fileType(),
+      this.fileType()
     );
     if (fileError) {
-      console.log("Caught Error:", fileError);
+      console.log("(media-file.ts) Caught Error:", fileError);
       return;
     }
 
@@ -108,7 +114,7 @@ export class MediaFile extends File {
   }
   getDetails = async (): Promise<Metadata | undefined> => {
     const { data: fileType, error: fileError } = await tryCatch<FileType>(
-      this.fileType(),
+      this.fileType()
     );
     if (fileError) {
       console.log("Caught Error:", fileError);
@@ -119,24 +125,23 @@ export class MediaFile extends File {
       return;
     }
 
-    const { data, error } = await tryCatch<FFProbeResult>(
-      ffprobe(this.unixPath, {
-        path: ffprobeStatic.path,
-      }),
-    );
+    const { data, error } = await tryCatch(getVideoDetails(this.unixPath));
     if (error) {
       log(`Error getting video specific metadata: ${error}`, "ERROR");
       return;
     }
 
-    const video = data.streams[0];
-    const size = round(Bun.file(this.unixPath).size / 1000 / 1000);
-    const bitrate = round(video.bit_rate / 1000 / 1000);
-    const length = round(parseInt(video.duration));
+    const size = round(Bun.file(this.unixPath).size / 1024 / 1024);
+    const length = round(parseInt(data.length));
+
+    let bitrate = round((size * 8) / (length * 1_000_000));
+    if (data.bitrate) {
+      bitrate = round(data.bitrate / 1_000_000);
+    }
 
     return {
-      colorProfile: video.pix_fmt,
-      codec: video.codec_name,
+      colorProfile: data.colorProfile,
+      codec: data.codec,
       length,
       bitrate,
       size,
@@ -144,32 +149,57 @@ export class MediaFile extends File {
   };
 }
 
+const getVideoDetails = async (path: string) => {
+  const result =
+    await $`ffprobe -v error -select_streams v:0 -show_entries stream=codec_name,pix_fmt,bit_rate -show_entries format=duration,bit_rate -of json "${path}"`.text();
+
+  const data = JSON.parse(result);
+  const videoStream = data.streams[0] || {};
+  const format = data.format || {};
+
+  return {
+    codec: videoStream.codec_name,
+    length: format.duration,
+    colorProfile: videoStream.pix_fmt,
+    // Try stream bitrate first, fall back to format bitrate if not available
+    bitrate: videoStream.bit_rate
+      ? parseInt(videoStream.bit_rate)
+      : format.bit_rate
+      ? parseInt(format.bit_rate)
+      : null,
+  };
+};
+
 // gets a path's "meta" origin
-const getPathOrigin = (path: string): SourcePath => {
-  if (
-    /^[A-Za-z]:\\/.test(path) || // Standard Windows path (e.g., D:\Games\...)
-    /^\/[A-Za-z]\//.test(path) // Git Bash style Windows path (e.g., /d/Games/...)
-  ) {
-    return "win32";
+const getPathOrigin = (path: string) => {
+  let origin: SourcePath = "unix";
+  let style: SourceStyle = "unix";
+
+  // Standard Windows path (e.g., D:\Games\...)
+  if (/^[A-Za-z]:\\/.test(path)) {
+    origin = "win32";
+    style = "win32";
   }
 
   // Check for WSL paths (accessed from Windows)
   if (/^\\\\wsl\.localhost\\/.test(path)) {
-    return "unix";
+    origin = "unix";
+    style = "win32";
   }
 
   // Check for Unix paths
   if (/^\/(?!mnt\/[a-z]\/).+/.test(path)) {
-    return "unix";
+    origin = "unix";
+    style = "unix";
   }
 
   // Check for Unix path accessing Windows drives
   if (/^\/mnt\/[a-z]\//.test(path)) {
-    return "win32"; // These are Windows drives accessed from WSL
+    origin = "win32";
+    style = "unix";
   }
 
-  // Default to unix if nothing matches
-  return "unix";
+  return { origin, style };
 };
 
 const round = (unit: number) => {

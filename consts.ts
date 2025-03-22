@@ -38,9 +38,9 @@ export const KEEP_LANGUAGE_CODES = [
 export const SUBTITLE_PRESET = "subs.json"; // ./presets/subs.json
 export const NO_SUBTITLE_PRESET = "no-subs.json"; // ./presets/no-subs.json
 
-// what these presets are named wihtin the handbrake windows GUI
-export const SUBTITLE_PRESET_GUI_NAME = "AMD SUBS";
-export const NO_SUBTITLE_PRESET_GUI_NAME = "AMD NO-SUBS";
+// what these presets are named. You can check this in the preset .json file's "PresetName" property
+export const SUBTITLE_PRESET_NAME = "AMD SUBS";
+export const NO_SUBTITLE_PRESET_NAME = "AMD NO-SUBS";
 
 // default quality value if trying to get the best one automatically fails
 export const DEFAULT_Q = 25;
@@ -94,6 +94,11 @@ export const VERBOSE = true;
 
 // skips sleep timer; skips copying to temp directory when necessary; for development
 export const DEVELOPMENT = false;
+
+export const SKIP_SLEEP = true; // or just skip the sleep timer, will run during the night
+export const SLEEP_FROM_H = 23; // from when to sleep hours (23:00 / 11PM)
+export const SLEEP_TO_H = 7; // to when to sleep hours (7:00 / 7AM)
+export const SLEEP_TO_M = 30; // to when to sleep minutes (SLEEP_TO_H:30 AM)
 
 // transfer files to this IP address
 const TRANSFER_TO_USER = "roberts";

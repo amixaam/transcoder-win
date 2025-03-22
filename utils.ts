@@ -1,7 +1,16 @@
 import { existsSync } from "node:fs";
 import { appendFile, readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
-import { DEVELOPMENT, LOCK_FILE, LOG_FILE, VERBOSE } from "./consts";
+import {
+  DEVELOPMENT,
+  LOCK_FILE,
+  LOG_FILE,
+  SKIP_SLEEP,
+  SLEEP_FROM_H,
+  SLEEP_TO_H,
+  SLEEP_TO_M,
+  VERBOSE,
+} from "./consts";
 
 export interface JSONMetadata {
   media_output_directory: string;
@@ -99,27 +108,27 @@ export const waitSleepHours = async () => {
   const currentHour = currentTime.getHours();
   const currentMinutes = currentTime.getMinutes();
 
-  if (DEVELOPMENT) {
-    log(`Development: Overwriting sleep timer`, "VERBOSE");
+  if (DEVELOPMENT || SKIP_SLEEP) {
+    log(`Ignoring sleep timer...`, "VERBOSE");
     return;
   }
 
   if (
-    currentHour >= 23 ||
-    currentHour < 7 ||
-    (currentHour === 7 && currentMinutes < 30)
+    currentHour >= SLEEP_FROM_H ||
+    currentHour < SLEEP_TO_H ||
+    (currentHour === SLEEP_TO_H && currentMinutes < SLEEP_TO_M)
   ) {
     // Calculate target time for 7:30 AM
     const target = new Date();
-    target.setHours(7, 30, 0, 0);
+    target.setHours(SLEEP_TO_H, SLEEP_TO_M, 0, 0);
 
     // If it's already past 7:30 AM today, set target to 7:30 AM tomorrow
     if (currentTime > target) {
       target.setDate(target.getDate() + 1);
     }
 
-    // Add a random delay between 1 and 30 seconds
-    const randomDelay = Math.floor(Math.random() * 30) + 1;
+    // Add a random delay between 1 and 40 seconds
+    const randomDelay = Math.floor(Math.random() * 40) + 1;
     target.setSeconds(target.getSeconds() + randomDelay);
 
     // Sleep until the target time
@@ -142,16 +151,17 @@ export const getPerformance = (startTime: number) => {
 
 export const log = async (
   message: string,
-  tag: "LOG" | "WARN" | "ERROR" | "VERBOSE" = "LOG",
+  tag: "LOG" | "WARN" | "ERROR" | "VERBOSE" = "LOG"
 ) => {
   if (!VERBOSE && tag === "VERBOSE") return;
 
   const yellow = "\x1b[33m";
   const green = "\x1b[32m";
   const red = "\x1b[31m";
+  const cyan = "\x1b[36m";
   const reset = "\x1b[0m";
 
-  let tagColor = yellow;
+  let tagColor = cyan;
   if (tag === "LOG") tagColor = green;
   else if (tag === "WARN") tagColor = yellow;
   else if (tag === "ERROR") tagColor = red;
@@ -224,7 +234,7 @@ export function sanitizeFilename(filename: string): string {
   sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, "-"); // Control characters
   sanitized = sanitized.replace(
     /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i,
-    "-",
+    "-"
   ); // Reserved names
 
   // Remove or trim leading and trailing spaces
@@ -243,8 +253,9 @@ export function sanitizeFilename(filename: string): string {
 }
 
 export const clearTags = (dirName: string) => {
-  let sanitized = dirName.replace(/\[(.*?)\]/g, "");
-  sanitized = sanitized.replace(" ", "");
+  let sanitized = dirName.replace(/\[(.*?)\]/g, ""); // Remove square brackets and their contents
+  sanitized = sanitized.replace(/\((.*?)\)/g, ""); // Remove parentheses and their contents
+  sanitized = sanitized.replace(/\s+/g, " "); // Replace multiple spaces with single space
   sanitized = sanitized.trim();
   return sanitized;
 };
