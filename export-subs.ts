@@ -41,12 +41,12 @@ function getSubtitleExtension(codec: string) {
   }
 }
 
-export const exportSubtitles = async (absoluteDestinationDir: string) => {
-  const files = await readdir(absoluteDestinationDir, { recursive: true });
+export const exportSubtitles = async (tempDirUnixPath: string) => {
+  const files = await readdir(tempDirUnixPath, { recursive: true });
 
   files.forEach(async (file) => {
     if (!file.endsWith(".mkv")) return;
-    const fullPath = resolve(absoluteDestinationDir, file);
+    const fullPath = resolve(tempDirUnixPath, file);
     const fileDir = dirname(fullPath);
 
     let currentTrack: Track = {} as Track;
@@ -72,7 +72,7 @@ export const exportSubtitles = async (absoluteDestinationDir: string) => {
 
       if (trimmedLine.includes("Track number:")) {
         const match = trimmedLine.match(
-          /track ID for mkvmerge & mkvextract: (\d+)/
+          /track ID for mkvmerge & mkvextract: (\d+)/,
         );
         if (match) currentTrack.id = parseInt(match[1]!);
         continue;
@@ -90,7 +90,9 @@ export const exportSubtitles = async (absoluteDestinationDir: string) => {
           .split("+ Language (IETF BCP 47):")[1]!
           .trim();
         currentTrack.language = language;
-        if (!KEEP_LANGUAGE_CODES.includes(language)) inTrack = false;
+        if (KEEP_LANGUAGE_CODES.length != 0) {
+          if (!KEEP_LANGUAGE_CODES.includes(language)) inTrack = false;
+        }
         continue;
       } else if (trimmedLine.includes("+ Name:")) {
         const name = trimmedLine.split("+ Name:")[1]!.trim();
@@ -107,7 +109,7 @@ export const exportSubtitles = async (absoluteDestinationDir: string) => {
     for (const track of subtitleTracks) {
       const extension = getSubtitleExtension(track.codec as string);
       const name = sanitizeFilename(
-        track.name || `Track${(track.id as number).toString()}`
+        track.name || `Track${(track.id as number).toString()}`,
       );
 
       // Extract just the base name without the extension

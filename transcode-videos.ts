@@ -1,6 +1,6 @@
 import { $ } from "bun";
 import { readdir, rename, stat, unlink } from "node:fs/promises";
-import { basename, dirname, extname, join, resolve } from "node:path";
+import { basename, extname, join, resolve } from "node:path";
 import { join as winJoin } from "node:path/win32";
 import {
   ALLOW_TRANSCODE,
@@ -11,27 +11,28 @@ import {
   HARDWARE_ACCEL_TYPE,
   KEEP_FILES_WITH_EXTENSION,
   NO_SUBTITLE_PRESET,
+  NO_SUBTITLE_PRESET_GUI_NAME,
   PRESET_DIR,
   SKIP_TRANSCODE_CODECS,
   SUBTITLE_PRESET,
+  SUBTITLE_PRESET_GUI_NAME,
   TEST_ENCODE_FOR_SECONDS,
   hwAccel_h265,
   hwAccel_h265_10,
   software_h265,
   software_h265_10,
 } from "./consts";
-import {
-  getPerformance,
-  getVideoMetadata,
-  log,
-  waitSleepHours,
-  wslToWin,
-  type Metadata,
-} from "./utils";
+import { getPerformance, log, waitSleepHours, wslToWin } from "./utils";
+import { GenericFile, MediaFile } from "./utils/media-file";
+import { tryCatch } from "./utils/try-catch";
 
-const presetDirPath = wslToWin(PRESET_DIR);
-const subtitlePreset = winJoin(presetDirPath, SUBTITLE_PRESET);
-const noSubtitlePreset = winJoin(presetDirPath, NO_SUBTITLE_PRESET);
+const presetDirPath = new GenericFile(PRESET_DIR);
+const subtitlePreset = new GenericFile(
+  join(presetDirPath.unixPath, SUBTITLE_PRESET),
+);
+const noSubtitlePreset = new GenericFile(
+  join(presetDirPath.unixPath, NO_SUBTITLE_PRESET),
+);
 
 const getBitrateRange = (category: string) => {
   if (category.includes("anime")) return BITRATE_RANGES.Anime;
@@ -41,71 +42,102 @@ const getBitrateRange = (category: string) => {
 
 // Process files after transcoding (cleanup and rename)
 async function processFiles(absoluteDestinationDir: string): Promise<void> {
-  // First, delete invalid files
+  // 1st - delete invalid files
   const files = await readdir(absoluteDestinationDir, { recursive: true });
-  for await (const file of files) {
-    const absoluteFilePath = resolve(absoluteDestinationDir, file);
-    if ((await stat(absoluteFilePath)).isDirectory()) continue;
+  for await (const filePath of files) {
+    const file = new GenericFile(resolve(absoluteDestinationDir, filePath));
+    if ((await file.fileType()) === "directory") continue;
 
-    const fileExtension = extname(file).toLowerCase();
-    const fileName = basename(file);
-
-    // Delete invalid extensions or non-processed MP4 files
     if (
-      !KEEP_FILES_WITH_EXTENSION.includes(fileExtension) ||
-      (fileExtension === ".mp4" && !fileName.endsWith("_HBPROCESSED.mp4"))
+      !KEEP_FILES_WITH_EXTENSION.includes(file.extension) ||
+      (file.extension === ".mp4" && !file.base.endsWith("_HBPROCESSED"))
     ) {
-      await unlink(absoluteFilePath);
-      log(`Deleted: ${absoluteFilePath}`);
+      await unlink(file.unixPath);
+      log(`Deleted: ${file.name}`);
     }
   }
 
-  Bun.sleep(5000);
+  Bun.sleep(1000);
 
-  // Rename processed files
+  // 2nd - Rename processed files
   const processedFiles = await readdir(absoluteDestinationDir, {
     recursive: true,
   });
-  for await (const file of processedFiles) {
-    const absoluteFilePath = resolve(absoluteDestinationDir, file);
-    if ((await stat(absoluteFilePath)).isDirectory()) continue;
+  for await (const filePath of processedFiles) {
+    const file = new GenericFile(resolve(absoluteDestinationDir, filePath));
+    if ((await file.fileType()) === "directory") continue;
 
-    const fileName = basename(file);
-    if (fileName.endsWith("_HBPROCESSED.mp4")) {
-      const newFileName = fileName.replace("_HBPROCESSED.mp4", ".mp4");
-      const newFilePath = join(dirname(absoluteFilePath), newFileName);
-      await rename(absoluteFilePath, newFilePath);
-      log(`Renamed: ${absoluteFilePath} to ${newFilePath}`);
+    if (file.base.endsWith("_HBPROCESSED")) {
+      const newFileName = file.name.replace("_HBPROCESSED.mp4", ".mp4");
+      const newFileUnixPath = join(file.dirPath, newFileName);
+      await rename(file.unixPath, newFileUnixPath);
+      log(`Renamed: ${file.unixPath} to ${newFileUnixPath}`);
     }
   }
 }
 
-// Find optimal quality setting by transcoding a sample
-const findOptimalQuality = async (
-  metadata: Metadata,
-  mediaCategory: string
-) => {
-  const outputFileName = `${metadata.baseName}_HBPROCESSED.mp4`;
-  const bitrateRange = getBitrateRange(mediaCategory);
+const getVideoTranscodeSettings = async (video: MediaFile) => {
+  const metadata = await video.getDetails();
+  if (!metadata) return;
 
-  // Sample from middle of video
-  const startAtSeconds = Math.round(metadata.length / 2);
-  const encodeForSeconds = Math.min(
-    TEST_ENCODE_FOR_SECONDS,
-    metadata.length - startAtSeconds
-  );
-  const videoChunkCount = Math.ceil(metadata.length / encodeForSeconds);
+  const outputFileName = `${video.base}_HBPROCESSED.mp4`;
+  const outputVideo = new MediaFile(join(video.dirPath, outputFileName));
 
-  // Set encoder based on color profile
-  const hwEncoder = EIGHT_BIT_COLOR_PROFILES.includes(metadata.colorProfile)
+  const hardwareEncoder = EIGHT_BIT_COLOR_PROFILES.includes(
+    metadata.colorProfile,
+  )
     ? hwAccel_h265
     : hwAccel_h265_10;
   const softwareEncoder =
-    hwEncoder === hwAccel_h265_10 ? software_h265_10 : software_h265;
+    hardwareEncoder === hwAccel_h265_10 ? software_h265_10 : software_h265;
 
-  // Choose preset based on file extension
-  const preset =
-    metadata.extension === ".mkv" ? noSubtitlePreset : subtitlePreset;
+  const preset = video.extension === ".mkv" ? noSubtitlePreset : subtitlePreset;
+
+  const presetName = noSubtitlePreset
+    ? NO_SUBTITLE_PRESET_GUI_NAME
+    : SUBTITLE_PRESET_GUI_NAME;
+
+  const startAtSeconds = Math.round(metadata.length / 2);
+  const encodeForSeconds = Math.min(
+    TEST_ENCODE_FOR_SECONDS,
+    metadata.length - startAtSeconds,
+  );
+  const videoChunkCount = Math.ceil(metadata.length / encodeForSeconds);
+
+  return {
+    outputVideo,
+    hardwareEncoder,
+    softwareEncoder,
+    preset,
+    presetName,
+    testing: {
+      startAtSeconds,
+      encodeForSeconds,
+      videoChunkCount,
+    },
+  };
+};
+
+// Find optimal quality setting by transcoding a sample
+const findOptimalQuality = async (video: MediaFile, mediaCategory: string) => {
+  const bitrateRange = getBitrateRange(mediaCategory);
+
+  const metadata = await video.getDetails();
+  if (!metadata) return DEFAULT_Q;
+
+  const settings = await getVideoTranscodeSettings(video);
+  if (!settings) return DEFAULT_Q;
+
+  const {
+    outputVideo,
+    hardwareEncoder,
+    softwareEncoder,
+    preset,
+    presetName,
+    testing,
+  } = settings;
+
+  const { startAtSeconds, encodeForSeconds, videoChunkCount } = testing;
 
   // Binary search for optimal quality
   let low = 3;
@@ -118,84 +150,72 @@ const findOptimalQuality = async (
   let attempts = 0;
   while (attempts < 8 && (low <= high || mid !== lastMid)) {
     log(`ATTEMPT ${++attempts}, Trying for q = ${mid}...`);
-
-    const winFilePath = wslToWin(metadata.filePath);
-    const winDirPath = wslToWin(metadata.dirPath);
-    const outputFilePath = winJoin(winDirPath, outputFileName);
-
     let encodingSuccess = false;
 
-    // Try hardware acceleration first if enabled
+    // 1st try - with hardware accel
     if (HARDWARE_ACCEL_TYPE) {
-      try {
-        log(`Attempting with hardware acceleration (${HARDWARE_ACCEL_TYPE})`);
-        await $`cmd.exe /c "${HANDBRAKE_PATH}" --preset-import-file "${preset}" -i "${winFilePath}" -o "${outputFilePath}" --start-at seconds:${startAtSeconds} --stop-at seconds:${encodeForSeconds} -e ${hwEncoder} -q ${mid} --enable-hw-decoding ${HARDWARE_ACCEL_TYPE}`;
-        encodingSuccess = true;
-      } catch (error) {
-        log(
-          `Hardware acceleration failed: ${error}. Retrying without.`,
-          "WARN"
-        );
-        await Bun.sleep(5000);
-      }
+      const { data: _, error } = await tryCatch(
+        $`cmd.exe /c "${HANDBRAKE_PATH}" --preset-import-file "${preset.winPath}" -Z "${presetName}"  -i "${video.winPath}" -o "${outputVideo.winPath}" --start-at seconds:${startAtSeconds} --stop-at seconds:${encodeForSeconds} -e ${hardwareEncoder} -q ${mid} --enable-hw-decoding ${HARDWARE_ACCEL_TYPE}`,
+      );
+      if (error) {
+        log(`Hardware acceleration failed: ${error}`, "WARN");
+        Bun.sleep(5000);
+      } else encodingSuccess = true;
     }
 
-    // Try regular encoding if hardware acceleration failed or was not enabled
+    // 2nd try - with semi-software fallback
     if (!encodingSuccess) {
-      try {
-        await $`cmd.exe /c "${HANDBRAKE_PATH}" --preset-import-file "${preset}" -i "${winFilePath}" -o "${outputFilePath}" --start-at seconds:${startAtSeconds} --stop-at seconds:${encodeForSeconds} -e ${hwEncoder} -q ${mid}`;
-        encodingSuccess = true;
-      } catch (error) {
-        log(
-          `Regular encoding failed: ${error}. Trying software fallback.`,
-          "ERROR"
-        );
-        await Bun.sleep(5000);
-
-        // Last resort: software encoding
-        try {
-          await $`cmd.exe /c "${HANDBRAKE_PATH}" --preset-import-file "${preset}" -i "${winFilePath}" -o "${outputFilePath}" --start-at seconds:${startAtSeconds} --stop-at seconds:${encodeForSeconds} -e ${softwareEncoder} -q ${mid}`;
-          log(`Software encoding successful`);
-          encodingSuccess = true;
-        } catch (secondError) {
-          log(
-            `All encoding methods failed: ${secondError}. Using default quality.`,
-            "ERROR"
-          );
-          return DEFAULT_Q;
-        }
-      }
+      log(`Attempting with semi-software fallback`);
+      const { data: _, error } = await tryCatch(
+        $`cmd.exe /c "${HANDBRAKE_PATH}" --preset-import-file "${preset.winPath}" -Z "${presetName}" -i "${video.winPath}" -o "${outputVideo.winPath}" --start-at seconds:${startAtSeconds} --stop-at seconds:${encodeForSeconds} -e ${hardwareEncoder} -q ${mid}`,
+      );
+      if (error) {
+        log(`Software fallback failed: ${error}`, "ERROR");
+        Bun.sleep(5000);
+      } else encodingSuccess = true;
     }
 
+    // 3rd try - with full software fallback
+    if (!encodingSuccess) {
+      log(`Attempting with full software fallback`);
+      const { data: _, error } = await tryCatch(
+        $`cmd.exe /c "${HANDBRAKE_PATH}" --preset-import-file "${preset.winPath}" -Z "${presetName}" -i "${video.winPath}" -o "${outputVideo.winPath}" --start-at seconds:${startAtSeconds} --stop-at seconds:${encodeForSeconds} -e ${softwareEncoder} -q ${mid}`,
+      );
+      if (error) {
+        log(
+          `Software fallback failed, using default quality: ${error}`,
+          "ERROR",
+        );
+        Bun.sleep(5000);
+        return DEFAULT_Q;
+      } else encodingSuccess = true;
+    }
+
+    // compare with previous sample - Binary search
     if (encodingSuccess) {
       await Bun.sleep(1000);
 
       // Get metadata of sample output
-      const processedMetadata = await getVideoMetadata(
-        resolve(dirname(metadata.filePath), outputFileName)
-      );
-
-      if (!processedMetadata) {
+      const outputMetadata = await outputVideo.getDetails();
+      if (!outputMetadata) {
         log("Failed to get metadata of processed file", "ERROR");
         continue;
       }
 
       // Calculate estimated full size and bitrate
-      const estimatedSize = processedMetadata.size * videoChunkCount;
-      const estimatedBitrate = processedMetadata.bitrate;
+      const estimatedSize = outputMetadata.size * videoChunkCount;
+      const estimatedBitrate = outputMetadata.bitrate;
 
       // Check if result meets constraints
       if (
-        estimatedSize >= metadata.size - 25 ||
+        estimatedSize >= metadata.size ||
         estimatedBitrate >= metadata.bitrate ||
         estimatedBitrate >= bitrateRange[1]!
       ) {
         // Too large or high bitrate - increase quality value (lower quality)
         low = mid + 1;
         log(
-          `Result exceeded constraints. Estimated: ${
-            Math.round(estimatedSize * 100) / 100
-          } MB (${Math.round(estimatedBitrate * 100) / 100} Mb/s)`
+          `Result exceeded constraints. Estimated: ${estimatedSize} MB > ${metadata.size} MB (Bitrate: ${estimatedBitrate} Mb/s)`,
         );
       } else if (estimatedBitrate <= bitrateRange[0]!) {
         // Too low bitrate - decrease quality value (higher quality)
@@ -205,9 +225,7 @@ const findOptimalQuality = async (
           best_bitrate = estimatedBitrate;
         }
         log(
-          `Bitrate lower than allowed range, estimated: ${
-            Math.round(estimatedBitrate * 100) / 100
-          } Mb/s. Best result: ${Math.round(best_bitrate * 100) / 100} Mb/s.`
+          `Bitrate lower than allowed range, estimated: ${estimatedBitrate} Mb/s < ${bitrateRange[0]} Mb/s. Best result: ${best_bitrate} Mb/s.`,
         );
       } else {
         // Within constraints - potential sweet spot
@@ -216,9 +234,7 @@ const findOptimalQuality = async (
           best_bitrate = estimatedBitrate;
         }
         log(
-          `Within constraints, estimated: ${
-            Math.round(estimatedBitrate * 100) / 100
-          } Mb/s. Best result: ${Math.round(best_bitrate * 100) / 100} Mb/s.`
+          `Within constraints, estimated: ${estimatedBitrate} Mb/s. Best result: ${best_bitrate} Mb/s.`,
         );
         high = mid - 1; // Still try for lower q (higher quality)
       }
@@ -226,8 +242,6 @@ const findOptimalQuality = async (
       // Calculate new midpoint
       lastMid = mid;
       mid = Math.round((low + high) / 2);
-
-      await Bun.sleep(5000);
     }
   }
 
@@ -235,98 +249,83 @@ const findOptimalQuality = async (
 };
 
 // Transcode a single file
-const transcodeFile = async (metadata: Metadata, q: number) => {
-  const outputFileName = `${metadata.baseName}_HBPROCESSED.mp4`;
-  const hwEncoder = EIGHT_BIT_COLOR_PROFILES.includes(metadata.colorProfile)
-    ? hwAccel_h265
-    : hwAccel_h265_10;
-  const softwareEncoder =
-    hwEncoder === hwAccel_h265_10 ? software_h265_10 : software_h265;
-  const preset =
-    metadata.extension === ".mkv" ? noSubtitlePreset : subtitlePreset;
+const transcodeFile = async (video: MediaFile, q: number) => {
+  const settings = await getVideoTranscodeSettings(video);
+  if (!settings) return;
 
-  const winFilePath = wslToWin(metadata.filePath);
-  const winDirPath = wslToWin(metadata.dirPath);
-  const outputFilePath = winJoin(winDirPath, outputFileName);
+  const { outputVideo, hardwareEncoder, softwareEncoder, preset, presetName } =
+    settings;
 
-  log(`Transcoding ${metadata.fileName}. q = ${q}, encoder = ${hwEncoder}`);
+  log(`Transcoding ${video.name}. q = ${q}, encoder = ${hardwareEncoder}`);
 
   await Bun.sleep(5000);
 
-  // Try hardware acceleration first if enabled
+  // 1st try - with hardware accel
   if (HARDWARE_ACCEL_TYPE) {
-    try {
-      log(`Attempting with hardware acceleration (${HARDWARE_ACCEL_TYPE})`);
-      await $`cmd.exe /c "${HANDBRAKE_PATH}" -q ${q} --preset-import-file "${preset}" -i "${winFilePath}" -o "${outputFilePath}" -e ${hwEncoder} --enable-hw-decoding ${HARDWARE_ACCEL_TYPE}`;
-      return true;
-    } catch (error) {
-      log(`Hardware acceleration failed: ${error}. Retrying without.`, "WARN");
-      await Bun.sleep(5000);
-    }
-  }
-
-  // Try regular encoding
-  try {
-    await $`cmd.exe /c "${HANDBRAKE_PATH}" -q ${q} --preset-import-file "${preset}" -i "${winFilePath}" -o "${outputFilePath}" -e ${hwEncoder}`;
-    return true;
-  } catch (error) {
-    log(
-      `Regular encoding failed: ${error}. Trying software fallback.`,
-      "ERROR"
+    const { data: _, error: hwError } = await tryCatch(
+      $`cmd.exe /c "${HANDBRAKE_PATH}" --preset-import-file "${preset.winPath}" -Z "${presetName}" -i "${video.winPath}" -o "${outputVideo.winPath}" -e ${hardwareEncoder} -q ${q} --enable-hw-decoding ${HARDWARE_ACCEL_TYPE}`,
     );
-    await Bun.sleep(5000);
-
-    // Last resort: software encoding
-    try {
-      await $`cmd.exe /c "${HANDBRAKE_PATH}" -q ${q} --preset-import-file "${preset}" -i "${winFilePath}" -o "${outputFilePath}" -e ${softwareEncoder}`;
-      log(`Software encoding successful`);
-      return true;
-    } catch (secondError) {
-      log(
-        `All encoding methods failed: ${secondError}. Skipping file.`,
-        "ERROR"
-      );
-      return false;
-    }
+    if (hwError) {
+      log(`Hardware acceleration failed: ${hwError}`, "WARN");
+      Bun.sleep(5000);
+    } else return true;
   }
+
+  // 2nd try - with semi-software fallback
+  log(`Attempting with semi-software fallback`);
+  const { data: __, error: semiError } = await tryCatch(
+    $`cmd.exe /c "${HANDBRAKE_PATH}" --preset-import-file "${preset.winPath}" -Z "${presetName}" -i "${video.winPath}" -o "${outputVideo.winPath}" -e ${hardwareEncoder} -q ${q}`,
+  );
+  if (semiError) {
+    log(`Software fallback failed: ${semiError}`, "ERROR");
+    Bun.sleep(5000);
+  } else return true;
+
+  // 3rd try - with full software fallback
+  log(`Attempting with full software fallback`);
+  const { data: ___, error: softError } = await tryCatch(
+    $`cmd.exe /c "${HANDBRAKE_PATH}" --preset-import-file "${preset.winPath}" -Z "${presetName}" -i "${video.winPath}" -o "${outputVideo.winPath}" -e ${softwareEncoder} -q ${q}`,
+  );
+  if (softError) {
+    log(`Software fallback failed, skipping file: ${softError}`, "ERROR");
+    Bun.sleep(5000);
+  } else return true;
 };
 
 // Main function
 export const transcodeVideos = async (
   absoluteDestinationDir: string,
-  mediaCategory: string
+  mediaCategory: string,
 ) => {
   const files = await readdir(absoluteDestinationDir, { recursive: true });
   let currentDirectory = "";
   let q = DEFAULT_Q;
 
-  log("Starting video transcoding process", "VERBOSE");
+  log("Starting video transcoding process...", "VERBOSE");
 
   let fileCount = 0;
   for await (const file of files) {
+    await waitSleepHours();
+
     // Skip files that don't need transcoding
     const fileExt = extname(file);
     if (!ALLOW_TRANSCODE.includes(fileExt)) continue;
 
-    await waitSleepHours();
-
-    const metadata = await getVideoMetadata(
-      resolve(absoluteDestinationDir, file)
-    );
+    const video = new MediaFile(resolve(absoluteDestinationDir, file));
+    const metadata = await video.getDetails();
     if (!metadata) continue;
 
     // Skip codec or already processed files
+    const lowerCodec = metadata.codec.toLowerCase();
     if (
-      SKIP_TRANSCODE_CODECS.includes(metadata.codec.toLowerCase()) ||
-      metadata.baseName.endsWith("_HBPROCESSED")
+      SKIP_TRANSCODE_CODECS.includes(lowerCodec) ||
+      video.base.endsWith("_HBPROCESSED")
     ) {
-      log(
-        `Skipping ${metadata.fileName}: ${
-          SKIP_TRANSCODE_CODECS.includes(metadata.codec.toLowerCase())
-            ? `${metadata.codec} codec`
-            : "Already processed"
-        }`
-      );
+      const reason = SKIP_TRANSCODE_CODECS.includes(lowerCodec)
+        ? `${metadata.codec} codec`
+        : "Already processed";
+
+      log(`Skipping ${video.name}: ${reason}`);
       continue;
     }
 
@@ -334,18 +333,24 @@ export const transcodeVideos = async (
     const startTime = performance.now();
 
     // Get optimal quality for new directories
-    if (currentDirectory !== metadata.dirPath) {
-      currentDirectory = metadata.dirPath;
+    if (currentDirectory !== video.dirPath) {
+      currentDirectory = video.dirPath;
       log(`Analyzing new directory: ${currentDirectory}`, "VERBOSE");
-      q = await findOptimalQuality(metadata, mediaCategory);
+      q = await findOptimalQuality(video, mediaCategory);
     }
 
     // Transcode the file
-    await transcodeFile(metadata, q);
+    const { data: _, error: transcodeError } = await tryCatch(
+      transcodeFile(video, q),
+    );
+
+    if (transcodeError) {
+      log(`Transcoding failed unexpectedly: ${transcodeError}`, "ERROR");
+    }
 
     // Log completion time
     const timeString = getPerformance(startTime);
-    log(`File #${fileCount} (${metadata.baseName}) completed in ${timeString}`);
+    log(`File #${fileCount} (${video.base}) completed in ${timeString}`);
     log("-----------------------");
   }
 

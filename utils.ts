@@ -1,7 +1,6 @@
-import { $ } from "bun";
 import { existsSync } from "node:fs";
 import { appendFile, readdir, stat } from "node:fs/promises";
-import { basename, dirname, extname, join } from "node:path";
+import { join } from "node:path";
 import { DEVELOPMENT, LOCK_FILE, LOG_FILE, VERBOSE } from "./consts";
 
 export interface JSONMetadata {
@@ -14,96 +13,23 @@ export interface JSONMetadata {
   size: string;
 }
 
-type ColorProfile =
-  | "yuv420p"
-  | "yuv420p10le"
-  | "yuv444p"
-  | "yuv444p10le"
-  | "yuv420p12le"
-  | "yuv444p12le";
-
-/**
- * @interface Metadata
- * Represents metadata for a video file.
- */
-export interface Metadata {
-  /**
-   * @property {string} extension - The file extension without the leading dot (e.g., "mp4").
-   */
-  extension: string;
-  /**
-   * @property {string} codec - The video codec used in the file (e.g., "h264").
-   */
-  codec: string;
-  /**
-   * @property {string} colorProfile - The color profile of the video (e.g., "yuv420p").
-   * 10le means 10-bit color depth.
-   * 12le means 12-bit color depth.
-   */
-  colorProfile: ColorProfile;
-  /**
-   * @property {number} length - The duration of the video in seconds.
-   */
-  length: number;
-  /**
-   * @property {number} size - The size of the video file in megabytes (MB).
-   */
-  size: number;
-  /**
-   * @property {number} bitrate - The bitrate of the video in kilobits per second (Mb/s).
-   */
-  bitrate: number;
-  /**
-   * @property {string} filePath - The full path to the video file.
-   */
-  filePath: string;
-  /**
-   * @property {string} dirPath - The path to the directory containing the video file.
-   */
-  dirPath: string;
-  /**
-   * @property {string} fileName - The name of the video file including the extension.
-   */
-  fileName: string;
-  /**
-   * @property {string} baseName - The name of the video file without the extension.
-   */
-  baseName: string;
-  /**
-   * @property {string} windowsFilePath - The full path to the video file on Windows.
-   */
-  windowsFilePath: string;
-  /**
-   * @property {string} windowsDirPath - The path to the directory containing the video file on Windows.
-   */
-  windowsDirPath: string;
-}
-
 export async function getDirectorySize(directoryPath: string): Promise<number> {
   let totalSize = 0;
 
-  try {
-    const items = await readdir(directoryPath);
+  const items = await readdir(directoryPath);
 
-    for (const item of items) {
-      const itemPath = join(directoryPath, item);
-      const stats = await stat(itemPath);
+  for (const item of items) {
+    const itemPath = join(directoryPath, item);
+    const stats = await stat(itemPath);
 
-      if (stats.isDirectory()) {
-        totalSize += await getDirectorySize(itemPath);
-      } else if (stats.isFile()) {
-        totalSize += stats.size;
-      }
+    if (stats.isDirectory()) {
+      totalSize += await getDirectorySize(itemPath);
+    } else if (stats.isFile()) {
+      totalSize += stats.size;
     }
-
-    return totalSize;
-  } catch (error) {
-    log(
-      `Error calculating directory size for ${directoryPath}: ${error}`,
-      "ERROR"
-    );
-    return 0;
   }
+
+  return totalSize;
 }
 
 export function formatBytes(bytes: number): string {
@@ -168,52 +94,6 @@ export const winToWsl = (winPath: string): string => {
   return winPath;
 };
 
-export const getVideoMetadata = async (filePath: string) => {
-  try {
-    const codec = (
-      await $`ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of default=nokey=1:noprint_wrappers=1 "${filePath}"`.text()
-    ).trim();
-    const length = parseInt(
-      await $`ffprobe -v quiet -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`.text()
-    );
-    const colorProfile = (
-      await $`ffprobe -v error -select_streams v:0 -show_entries stream=pix_fmt -of default=nokey=1:noprint_wrappers=1 ${filePath}`.text()
-    ).trim();
-    const size = Bun.file(filePath).size; // in bytes
-    const bitrate = (size * 8) / length / 1000 / 1000; // bitrs / length / 1000 / 1000 = Mb/s
-    const extension = extname(filePath);
-
-    const fileName = basename(filePath);
-    const baseName = basename(filePath, extension);
-    const dirPath = dirname(filePath);
-
-    const sizeInMB = size / 1000 / 1000;
-
-    const windowsFilePath = winToWsl(filePath);
-    const windowsDirPath = winToWsl(dirPath);
-
-    const metadata: Metadata = {
-      extension,
-      codec,
-      colorProfile: colorProfile as ColorProfile,
-      length,
-      size: sizeInMB,
-      bitrate,
-      filePath,
-      dirPath,
-      fileName,
-      baseName,
-      windowsFilePath,
-      windowsDirPath,
-    };
-
-    return metadata;
-  } catch (error) {
-    log(`Error getting video metadata: ${error}`, "ERROR");
-    return null;
-  }
-};
-
 export const waitSleepHours = async () => {
   const currentTime = new Date();
   const currentHour = currentTime.getHours();
@@ -262,7 +142,7 @@ export const getPerformance = (startTime: number) => {
 
 export const log = async (
   message: string,
-  tag: "LOG" | "WARN" | "ERROR" | "VERBOSE" = "LOG"
+  tag: "LOG" | "WARN" | "ERROR" | "VERBOSE" = "LOG",
 ) => {
   if (!VERBOSE && tag === "VERBOSE") return;
 
@@ -344,7 +224,7 @@ export function sanitizeFilename(filename: string): string {
   sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, "-"); // Control characters
   sanitized = sanitized.replace(
     /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i,
-    "-"
+    "-",
   ); // Reserved names
 
   // Remove or trim leading and trailing spaces
@@ -368,3 +248,6 @@ export const clearTags = (dirName: string) => {
   sanitized = sanitized.trim();
   return sanitized;
 };
+
+export const readJsonFile = async (path: string): Promise<JSONMetadata> =>
+  JSON.parse(await Bun.file(path).text());

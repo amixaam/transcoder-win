@@ -16,6 +16,7 @@ export const TEMP_DIR = "/mnt/d/TORRENT/TEMP/MEDIA";
 export const HANDBRAKE_PATH = "C:\\Users\\Roberts\\HandBrakeCLI.exe";
 
 // Keep subtitles with these language codes, delete rest
+// keep empty array to keep all subtitles
 export const KEEP_LANGUAGE_CODES = [
   "en",
   "eng",
@@ -36,6 +37,12 @@ export const KEEP_LANGUAGE_CODES = [
 // subtitle presets should be within ./presets/
 export const SUBTITLE_PRESET = "subs.json"; // ./presets/subs.json
 export const NO_SUBTITLE_PRESET = "no-subs.json"; // ./presets/no-subs.json
+
+// what these presets are named wihtin the handbrake windows GUI
+export const SUBTITLE_PRESET_GUI_NAME = "AMD SUBS";
+export const NO_SUBTITLE_PRESET_GUI_NAME = "AMD NO-SUBS";
+
+// default quality value if trying to get the best one automatically fails
 export const DEFAULT_Q = 25;
 
 // when trying for best quality, encode videos for this many seconds. automatically shortens if source is shorter.
