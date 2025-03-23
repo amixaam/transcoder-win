@@ -9,15 +9,13 @@ import { transferFiles } from "./transfer-files";
 import {
   acquireLock,
   clearTags,
-  formatBytes,
-  getDirectorySize,
+  formatMegaBytes,
   getPerformance,
   log,
   readJsonFile,
   releaseLock,
   sanitizeFilename,
   waitSleepHours,
-  winToWsl,
   type JSONMetadata,
 } from "./utils";
 import { GenericFile } from "./utils/media-file";
@@ -70,6 +68,7 @@ process.on("SIGTERM", async () => {
 
 async function main() {
   try {
+    log(`Starting transcoder-win: ${Bun.argv[2]!}`);
     await acquireLock();
     await waitSleepHours();
 
@@ -149,7 +148,7 @@ async function main() {
       stat(tempDir.unixPath)
     );
     if (tempError || !DEVELOPMENT) {
-      log(`Error checking temp directory, creating it: ${tempError}`, "WARN");
+      log(`Creating temp directory: ${tempDir.unixPath}`);
 
       const { data: _, error: copyError } = await tryCatch(copyToTempDir());
       if (copyError) {
@@ -171,18 +170,18 @@ async function main() {
 
     // remove temp directory and .json file
     log(`Removing ${tempDir.unixPath} and ${jsonPath}`);
-    try {
-      await $`rm -rf "${tempDir.unixPath}"`;
+    // try {
+    //   await $`rm -rf "${tempDir.unixPath}"`;
 
-      const jsonFile = Bun.file(jsonPath);
-      if (await jsonFile.exists()) {
-        await $`rm "${jsonPath}"`;
-      } else {
-        log(`JSON file ${jsonPath} not found for removal`, "WARN");
-      }
-    } catch (error) {
-      log(`Error removing directory or JSON file: ${error}`, "ERROR");
-    }
+    //   const jsonFile = Bun.file(jsonPath);
+    //   if (await jsonFile.exists()) {
+    //     await $`rm "${jsonPath}"`;
+    //   } else {
+    //     log(`JSON file ${jsonPath} not found for removal`, "WARN");
+    //   }
+    // } catch (error) {
+    //   log(`Error removing directory or JSON file: ${error}`, "ERROR");
+    // }
 
     log(`SCRIPT FINISHED! Completed in ${getPerformance(now)}`);
 
@@ -196,21 +195,21 @@ async function main() {
 
     if (sizeDifference > 0) {
       log(
-        `Size stats: \nOriginal: ${formatBytes(
+        `Size stats: \nOriginal: ${formatMegaBytes(
           originalMetadata.size
-        )} \nNew: ${formatBytes(
+        )} \nNew: ${formatMegaBytes(
           newMetadata.size
-        )} \nSize Difference: ${formatBytes(
+        )} \nSize Difference: ${formatMegaBytes(
           sizeDifference
         )} \nPercent Change: ${percentChange}% smaller \n`
       );
     } else {
       log(
-        `Size stats: \n Original: ${formatBytes(
+        `Size stats: \n Original: ${formatMegaBytes(
           originalMetadata.size
-        )} \n New: ${formatBytes(
+        )} \n New: ${formatMegaBytes(
           newMetadata.size
-        )} \n Size Difference: ${formatBytes(
+        )} \n Size Difference: ${formatMegaBytes(
           Math.abs(sizeDifference)
         )} \n Percent Change: ${Math.abs(Number(percentChange))}% larger \n`
       );

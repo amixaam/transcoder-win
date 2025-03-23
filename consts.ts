@@ -90,18 +90,21 @@ export const KEEP_FILES_WITH_EXTENSION = [
 ];
 
 // extra logs
-export const VERBOSE = true;
+export const VERBOSE = false;
 
 // skips sleep timer; skips copying to temp directory when necessary; for development
 export const DEVELOPMENT = false;
 
-export const SKIP_SLEEP = true; // or just skip the sleep timer, will run during the night
+export const SKIP_SLEEP = false; // or just skip the sleep timer, will run during the night
 export const SLEEP_FROM_H = 23; // from when to sleep hours (23:00 / 11PM)
 export const SLEEP_TO_H = 7; // to when to sleep hours (7:00 / 7AM)
 export const SLEEP_TO_M = 30; // to when to sleep minutes (SLEEP_TO_H:30 AM)
 
+// if another transcode is in progress, wait this many minutes before checking again
+export const LOCK_FILE_SLEEP_TIME = 15;
+
 // transfer files to this IP address
 const TRANSFER_TO_USER = "roberts";
-const TRANSFER_TO_IP = "192.168.1.110";
+const TRANSFER_TO_IP = "192.168.2.11";
 export const TRANSFER_TO = `${TRANSFER_TO_USER}@${TRANSFER_TO_IP}`;
 export const DEFAULT_TRANSFER_DIR = "/media/roberts/jellyfin/media/UNSORTED";

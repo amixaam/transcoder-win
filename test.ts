@@ -1,4 +1,3 @@
-import { log } from "node:console";
 import { GenericFile, MediaFile } from "./utils/media-file";
 
 const path =
@@ -12,16 +11,9 @@ const wfilePath =
 // ).text();
 // console.log(file);
 
-const cleanPath = (path: string) => {
-  // Remove surrounding single or double quotes
-  return path.replace(/^['"]|['"]$/g, "");
-};
-
-// Then when using Bun.argv[3]
-const filePath = cleanPath(Bun.argv[3]!);
+const filePath = dirPath;
 const dir = new GenericFile(filePath);
-
-console.log(await dir.fileType());
+console.log(await dir.getDetails());
 
 const file = new MediaFile(wfilePath);
 console.log(await file.getDetails());

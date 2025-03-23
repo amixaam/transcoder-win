@@ -4,6 +4,7 @@ import { join } from "node:path";
 import {
   DEVELOPMENT,
   LOCK_FILE,
+  LOCK_FILE_SLEEP_TIME,
   LOG_FILE,
   SKIP_SLEEP,
   SLEEP_FROM_H,
@@ -41,14 +42,20 @@ export async function getDirectorySize(directoryPath: string): Promise<number> {
   return totalSize;
 }
 
-export function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 Bytes";
+export function formatMegaBytes(megabytes: number): string {
+  if (megabytes === 0) return "0 MB";
 
   const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const sizes = ["MB", "GB", "TB", "PB", "EB"]; // Start with MB
+  let i = 0;
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  let bytes = megabytes * k * k; // Convert MB to Bytes
+
+  if (bytes >= k * k) {
+    i = Math.floor(Math.log(bytes) / Math.log(k)) - 1; // Subtract 2, since we started at MB
+  }
+
+  return parseFloat((bytes / Math.pow(k, i + 2)).toFixed(2)) + " " + sizes[i]; // +2 because we are converting from MB
 }
 
 // Handle paths like /mnt/d/Games/... => D:\Games\...
@@ -179,6 +186,8 @@ export const log = async (
 };
 
 export const acquireLock = async (): Promise<void> => {
+  const waitForSeconds = LOCK_FILE_SLEEP_TIME * 60 * 1000;
+
   while (true) {
     try {
       // Check if lock file exists
@@ -192,14 +201,17 @@ export const acquireLock = async (): Promise<void> => {
         return;
       } else {
         // Lock already exists
-        log(`Lock file exists, waiting 3 minutes before retry`, "WARN");
-        // Wait 3 minutes (180000 ms)
-        await Bun.sleep(180000);
+        log(
+          `${Bun
+            .argv[3]!} Lock file exists, waiting ${LOCK_FILE_SLEEP_TIME} minutes before retry`,
+          "VERBOSE"
+        );
+        await Bun.sleep(waitForSeconds);
       }
     } catch (error) {
       log(`Error while acquiring lock: ${error}`, "ERROR");
       // Still wait before retrying in case of error
-      await Bun.sleep(180000);
+      await Bun.sleep(waitForSeconds);
     }
   }
 };
