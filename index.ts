@@ -96,8 +96,8 @@ async function main() {
     );
 
     // check if source exists
-    const source = new GenericFile(SOURCE_DIR);
-    if (!(await source.exists())) {
+    const source = await GenericFile.init(SOURCE_DIR);
+    if (!source.exists) {
       return log(`Source directory does not exist`, "ERROR");
     }
 
@@ -114,11 +114,15 @@ async function main() {
       );
     }
 
-    let tempDir = new GenericFile(clearTags(join(TEMP_DIR, TORRENT_NAME)));
+    let tempDir = await GenericFile.init(
+      clearTags(join(TEMP_DIR, TORRENT_NAME)),
+    );
 
-    if ((await source.fileType()) === "file") {
+    if (source.fileType === "file") {
       const torrentBasename = basename(TORRENT_NAME, extname(TORRENT_NAME));
-      tempDir = new GenericFile(clearTags(join(TEMP_DIR, torrentBasename)));
+      tempDir = await GenericFile.init(
+        clearTags(join(TEMP_DIR, torrentBasename)),
+      );
     }
 
     log(
@@ -131,7 +135,7 @@ async function main() {
       await mkdir(tempDir.unixPath, { recursive: true });
 
       log(`Copying ${source.unixPath} to ${tempDir.unixPath}`);
-      if ((await source.fileType()) === "file") {
+      if (source.fileType === "file") {
         await $`cp "${source.unixPath}" "${tempDir.unixPath}"`;
       } else {
         await $`cp -a "${source.unixPath}/." "${tempDir.unixPath}"`;
@@ -164,29 +168,10 @@ async function main() {
 
     // Calculate and log size Difference
     if (!originalMetadata || !newMetadata) return;
-    const sizeDifference = originalMetadata.size - newMetadata.size;
-    const percentChange = (
-      (sizeDifference / originalMetadata.size) *
-      100
-    ).toFixed(2);
-
-    if (sizeDifference > 0) {
-      log(
-        `Size stats: \nOriginal: ${formatBytes(
-          originalMetadata.size,
-        )} \nNew: ${formatBytes(newMetadata.size)} \nSize Difference: ${formatBytes(
-          sizeDifference,
-        )} \nPercent Change: ${percentChange}% smaller \n`,
-      );
-    } else {
-      log(
-        `Size stats: \n Original: ${formatBytes(
-          originalMetadata.size,
-        )} \n New: ${formatBytes(newMetadata.size)} \n Size Difference: ${formatBytes(
-          Math.abs(sizeDifference),
-        )} \n Percent Change: ${Math.abs(Number(percentChange))}% larger \n`,
-      );
-    }
+    log(`size before: ${originalMetadata.size} MB`);
+    log(`size after: ${newMetadata.size} MB`);
+    log(`size difference: ${originalMetadata.size - newMetadata.size} MB`);
+    log("-------------------------------------");
 
     await releaseLock();
   } catch (error) {

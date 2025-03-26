@@ -2,6 +2,8 @@ import { existsSync } from "node:fs";
 import { appendFile, readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { DEVELOPMENT, LOCK_FILE, LOG_FILE, VERBOSE } from "./consts";
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
 
 export interface JSONMetadata {
   media_output_directory: string;
@@ -12,6 +14,10 @@ export interface JSONMetadata {
   name: string;
   size: string;
 }
+
+export const round = (unit: number) => {
+  return Math.round(unit * 100) / 100;
+};
 
 export async function getDirectorySize(directoryPath: string): Promise<number> {
   let totalSize = 0;
@@ -149,6 +155,7 @@ export const log = async (
   const yellow = "\x1b[33m";
   const green = "\x1b[32m";
   const red = "\x1b[31m";
+  const gray = "\x1b[90m";
   const reset = "\x1b[0m";
 
   let tagColor = yellow;
@@ -157,7 +164,7 @@ export const log = async (
   else if (tag === "ERROR") tagColor = red;
 
   const currentTime = new Date();
-  const formattedMessageConsole = `[${green}${currentTime.toLocaleString()}${reset}] [${tagColor}${tag}${reset}] ${message}\n`;
+  const formattedMessageConsole = `${gray}[${currentTime.toLocaleString()}]${reset} ${tagColor}[${tag}]${reset} ${message}\n`;
   const formattedMessageFile = `[${currentTime.toLocaleString()}] [${tag}] ${message}\n`;
 
   console.log(formattedMessageConsole.trim());
@@ -167,6 +174,33 @@ export const log = async (
     console.error("Error writing to log file:", error);
   }
 };
+
+dayjs.extend(duration);
+export function formatSeconds(totalSeconds: number) {
+  if (typeof totalSeconds !== "number" || totalSeconds < 0) {
+    return "Ain't no valid seconds, boy!";
+  }
+
+  const dur = dayjs.duration(totalSeconds, "seconds");
+  const hours = dur.hours();
+  const minutes = dur.minutes();
+  const seconds = dur.seconds();
+
+  const parts = [];
+
+  if (hours > 0) {
+    parts.push(`${hours}h`);
+    parts.push(`${minutes}m`);
+    parts.push(`${seconds}s`);
+  } else if (minutes > 0) {
+    parts.push(`${minutes}m`);
+    parts.push(`${seconds}s`);
+  } else {
+    parts.push(`${seconds}s`);
+  }
+
+  return parts.join(" ");
+}
 
 export const acquireLock = async (): Promise<void> => {
   while (true) {
