@@ -3,7 +3,8 @@
 // handbrake.sample() -> avgBitrate, estimatedSize
 // handbrake.transcode() -> outputVideo
 
-import { sleep, spawn } from "bun";
+import { spawn } from "bun";
+import { join } from "node:path";
 import {
   EIGHT_BIT_COLOR_PROFILES,
   HANDBRAKE_PATH,
@@ -18,7 +19,6 @@ import {
 } from "../consts";
 import { formatSeconds, log, round } from "../utils";
 import { GenericFile, MediaFile, type Metadata } from "./media-file";
-import { join } from "node:path";
 
 export type TranscodeSettings = {
   outputVideo: MediaFile;
@@ -43,7 +43,7 @@ export class Handbrake {
   private constructor(
     video: MediaFile,
     metadata: Metadata,
-    settings: TranscodeSettings,
+    settings: TranscodeSettings
   ) {
     this.video = video;
     this.metadata = metadata;
@@ -54,12 +54,12 @@ export class Handbrake {
     // output
     const outputFileName = `${video.base}_HBPROCESSED.mp4`;
     const outputVideo = await MediaFile.init(
-      join(video.dirPath, outputFileName),
+      join(video.dirPath, outputFileName)
     );
 
     // encoding settings
     const hardwareEncoder = EIGHT_BIT_COLOR_PROFILES.includes(
-      metadata.colorProfile,
+      metadata.colorProfile
     )
       ? hwAccel_h265
       : hwAccel_h265_10;
@@ -68,10 +68,10 @@ export class Handbrake {
 
     const presetDirPath = await GenericFile.init(PRESET_DIR);
     const subtitlePreset = await GenericFile.init(
-      join(presetDirPath.unixPath, SUBTITLE_PRESET),
+      join(presetDirPath.unixPath, SUBTITLE_PRESET)
     );
     const noSubtitlePreset = await GenericFile.init(
-      join(presetDirPath.unixPath, NO_SUBTITLE_PRESET),
+      join(presetDirPath.unixPath, NO_SUBTITLE_PRESET)
     );
 
     // preset
@@ -106,7 +106,7 @@ export class Handbrake {
     const metadata = await video.getDetails();
     if (!metadata) {
       throw new Error(
-        `Failed to get video metadata for ${video.base}. Cannot initialize Handbrake.`,
+        `Failed to get video metadata for ${video.base}. Cannot initialize Handbrake.`
       );
     }
 
@@ -141,8 +141,9 @@ export class Handbrake {
     ];
 
     const baseArgs = [
-      // `cmd.exe /c ${HANDBRAKE_PATH}`,
-      "HandBrakeCLI",
+      `cmd.exe`,
+      "/c",
+      HANDBRAKE_PATH,
       "--preset-import-file",
       this.settings.preset.winPath,
       "-Z",
@@ -158,7 +159,7 @@ export class Handbrake {
         "--start-at",
         `seconds:${options.start}`,
         "--stop-at",
-        `seconds:${options.duration}`,
+        `seconds:${options.duration}`
       );
     }
 
@@ -187,25 +188,28 @@ export class Handbrake {
           stdout: "pipe",
           stderr: "pipe",
         });
+
         const exitCode = await proc.exited;
 
         if (exitCode === 0) {
           log(`Handbrake (${strat.name}) for ${outputName} succeeded!`);
+          await Bun.sleep(2500);
+
           return;
         } else {
           lastError = new Error(
-            `Handbrake (${strat.name}) for ${outputName} failed with exit code ${exitCode}.`,
+            `Handbrake (${strat.name}) for ${outputName} failed with exit code ${exitCode}.`
           );
           log(lastError.message, "WARN");
         }
       } catch (error: any) {
         // Catch errors during spawn itself (e.g., command not found)
         lastError = new Error(
-          `Failed to spawn Handbrake (${strat.name}) for ${outputName}: ${error.message}`,
+          `Failed to spawn Handbrake (${strat.name}) for ${outputName}: ${error.message}`
         );
         log(lastError.message, "WARN");
       }
-      await sleep(5000);
+      await Bun.sleep(2500);
     }
   }
 
@@ -219,11 +223,10 @@ export class Handbrake {
     });
 
     log(
-      `Transcode completed in ${formatSeconds((performance.now() - now) / 1000)}`,
+      `Transcode completed in ${formatSeconds(
+        (performance.now() - now) / 1000
+      )}`
     );
-
-    await this.video.delete();
-    await this.settings.outputVideo.rename(this.video.name);
 
     return this.settings.outputVideo;
   }
@@ -250,12 +253,12 @@ export class Handbrake {
 
     const getSampleVideo = async (n: number) => {
       return await MediaFile.init(
-        join(this.video.dirPath, `${this.settings.outputVideo.base}_${n}.mp4`),
+        join(this.video.dirPath, `${this.settings.outputVideo.base}_${n}.mp4`)
       );
     };
 
     log(
-      `Running sample with ${options.samples} samples of ${options.sampleLength} seconds each at q=${options.quality}...`,
+      `Running sample with ${options.samples} samples of ${sampleLength} seconds each at q=${options.quality}...`
     );
 
     const timeTable: { start: number; duration: number; output: MediaFile }[] =
@@ -267,14 +270,10 @@ export class Handbrake {
 
       timeTable.push({
         start: start == 0 ? 1 : start,
-        duration: options.sampleLength,
+        duration: sampleLength,
         output: await getSampleVideo(i),
       });
     }
-
-    const videoChunkCount = Math.ceil(
-      this.metadata.length / options.sampleLength,
-    );
 
     let totalBitrate = 0;
     let totalSize = 0;
@@ -301,12 +300,12 @@ export class Handbrake {
         totalSize += stats.size;
         successfulSamples++;
         log(
-          `Sample #${sample} completed in ${runtime}. Bitrate: ${stats.bitrate} Mb/s. Size: ${stats.size} MB`,
+          `Sample #${sample} completed in ${runtime}. Bitrate: ${stats.bitrate} Mb/s. Size: ${stats.size} MB`
         );
       } else {
         log(
           `Sample #${sample} failed to get valid stats (${runtime}). Excluding from average.`,
-          "WARN",
+          "WARN"
         );
       }
       await time.output.delete();
@@ -320,7 +319,9 @@ export class Handbrake {
     const avgSize = round(totalSize / successfulSamples);
 
     log(
-      `Handbrake sample completed. Estimated size: ${round((avgBitrate * this.metadata.length) / 8)} MB. Average bitrate: ${avgBitrate} Mb/s. Average size: ${avgSize} MB`,
+      `Handbrake sample completed. Estimated size: ${round(
+        (avgBitrate * this.metadata.length) / 8
+      )} MB. Average bitrate: ${avgBitrate} Mb/s. Average size: ${avgSize} MB`
     );
 
     return {

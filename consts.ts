@@ -43,7 +43,7 @@ export const DEFAULT_Q = 25;
 
 // when trying for best quality, sample n times for m seconds spread evenly across the source. automatically shortens if source is shorter.
 export const SAMPLES = 10;
-export const SAMPLE_LENGTH = 10;
+export const SAMPLE_LENGTH = 7;
 
 // processes all media to .mp4
 export const SKIP_TRANSCODE_CODECS = ["av1"]; // skips transcoding for these codecs
@@ -55,7 +55,7 @@ export const ALLOW_TRANSCODE = [
   ".flv",
   ".webm",
 ];
-export const EIGHT_BIT_COLOR_PROFILES = ["yuv420p", "yuv444p"]; // uses x265, any other color profile encoded with 10bit color
+export const EIGHT_BIT_COLOR_PROFILES = ["yuv420p", "yuv444p"]; //these are 8bit color profiles, any other color profile encoded with 10bit color (eg. 12bit -> 10bit)
 
 export const HARDWARE_ACCEL_TYPE: string = "vcn"; // leave empty to disable. vcn - AMD, Toolbox - Apple
 export const hwAccel_h265_10 = "vce_h265_10bit";
@@ -87,18 +87,10 @@ export const KEEP_FILES_WITH_EXTENSION = [
 ];
 
 // extra logs
-export const VERBOSE = false;
+export const VERBOSE = true;
+export const SKIP_SLEEP = true;
 
-// skips sleep timer; skips copying to temp directory when necessary; for development
 export const DEVELOPMENT = false;
-
-export const SKIP_SLEEP = false; // or just skip the sleep timer, will run during the night
-export const SLEEP_FROM_H = 23; // from when to sleep hours (23:00 / 11PM)
-export const SLEEP_TO_H = 7; // to when to sleep hours (7:00 / 7AM)
-export const SLEEP_TO_M = 30; // to when to sleep minutes (SLEEP_TO_H:30 AM)
-
-// if another transcode is in progress, wait this many minutes before checking again
-export const LOCK_FILE_SLEEP_TIME = 15;
 
 // transfer files to this IP address
 const TRANSFER_TO_USER = "roberts";

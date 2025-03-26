@@ -14,7 +14,7 @@ const getBitrateRange = (category: string) => {
 // using binary search, finds the best quality value for a video
 export const findBestQuality = async (
   video: MediaFile,
-  category: string,
+  category: string
 ): Promise<number> => {
   // binary search
   //
@@ -29,24 +29,36 @@ export const findBestQuality = async (
   const bitrateRange = getBitrateRange(category);
   if (!bitrateRange[0] || !bitrateRange[1]) return DEFAULT_Q;
 
-  let attempts = 6;
+  let attempts = 0;
 
-  let low = 0;
-  let high = 31;
+  let low = 10;
+  let high = 26;
   let mid = Math.round(((low + high) / 2) * 10) / 10;
   let best = DEFAULT_Q;
   let bestBitrate = 0;
 
-  while (low < high && attempts > 0) {
+  const handbrake = await Handbrake.init(video);
+
+  log(
+    `Source size: ${metadata.size} MB, Bitrate: ${metadata.bitrate} Mb/s`,
+    "VERBOSE"
+  );
+
+  while (low < high && attempts < 6 && Math.abs(high - low) > 0.3) {
     attempts--;
 
-    const handbrake = await Handbrake.init(video);
+    log("next sample -------------->");
+    log(
+      `attempt: #${attempts}, low: ${low}, high: ${high}, mid: ${mid}, best: ${best}, bestBitrate: ${bestBitrate}`,
+      "VERBOSE"
+    );
+
     const { data, error } = await tryCatch(
       handbrake.sample({
         quality: mid,
         samples: SAMPLES,
         sampleLength: SAMPLE_LENGTH,
-      }),
+      })
     );
 
     if (error) {
@@ -65,14 +77,29 @@ export const findBestQuality = async (
       low = mid + 1;
     } else if (avgBitrate < bitrateRange[0]) {
       high = mid - 1;
+      if (avgBitrate > bestBitrate) {
+        bestBitrate = avgBitrate;
+        best = mid;
+        log(
+          `New best bitrate: ${bestBitrate} Mb/s, New best quality: ${best}`,
+          "VERBOSE"
+        );
+      }
     } else {
       if (avgBitrate > bestBitrate) {
         bestBitrate = avgBitrate;
         best = mid;
+
+        log(
+          `New best bitrate: ${bestBitrate} Mb/s, New best quality: ${best}`,
+          "VERBOSE"
+        );
       }
 
       high = mid - 1;
     }
+
+    mid = Math.round(((low + high) / 2) * 10) / 10;
   }
 
   return best;

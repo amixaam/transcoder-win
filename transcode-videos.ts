@@ -6,7 +6,7 @@ import {
   KEEP_FILES_WITH_EXTENSION,
   SKIP_TRANSCODE_CODECS,
 } from "./consts";
-import { getPerformance, log, waitSleepHours } from "./utils";
+import { log, waitSleepHours } from "./utils";
 import { GenericFile, MediaFile } from "./utils/media-file";
 import { tryCatch } from "./utils/try-catch";
 import { Handbrake } from "./utils/handbrake";
@@ -14,16 +14,44 @@ import { findBestQuality } from "./sample-videos";
 
 // Process files after transcoding (cleanup unwanted files)
 async function fileCleanup(absoluteDestinationDir: string): Promise<void> {
+  log("cleaning up files...");
   const files = await readdir(absoluteDestinationDir, { recursive: true });
   for await (const filePath of files) {
     const file = await GenericFile.init(
-      resolve(absoluteDestinationDir, filePath),
+      resolve(absoluteDestinationDir, filePath)
     );
     if (file.fileType === "directory") continue;
 
-    if (!KEEP_FILES_WITH_EXTENSION.includes(file.extension)) {
+    if (
+      !KEEP_FILES_WITH_EXTENSION.includes(file.extension) ||
+      (file.extension === ".mp4" && !file.base.endsWith("_HBPROCESSED"))
+    ) {
       await unlink(file.unixPath);
       log(`Deleted: ${file.name}`);
+    }
+  }
+
+  // 2nd - Rename processed files
+
+  const processedFiles = await readdir(absoluteDestinationDir, {
+    recursive: true,
+  });
+
+  for await (const filePath of processedFiles) {
+    const file = await GenericFile.init(
+      resolve(absoluteDestinationDir, filePath)
+    );
+
+    if (file.fileType === "directory") continue;
+
+    if (file.base.endsWith("_HBPROCESSED")) {
+      const newFileName = file.name.replace("_HBPROCESSED.mp4", ".mp4");
+
+      const newFileUnixPath = join(file.dirPath, newFileName);
+
+      await rename(file.unixPath, newFileUnixPath);
+
+      log(`Renamed: ${file.unixPath} to ${newFileUnixPath}`);
     }
   }
 }
@@ -37,9 +65,6 @@ export const transcodeVideos = async (
   let currentDirectory = "";
   let q = DEFAULT_Q;
 
-  log(`absoluteDestinationDir: ${absoluteDestinationDir}`, "VERBOSE");
-  log(`files: ${files.length}`, "VERBOSE");
-
   log("Starting video transcoding process...", "VERBOSE");
 
   let fileCount = 0;
@@ -48,17 +73,11 @@ export const transcodeVideos = async (
 
     // Skip files that don't need transcoding
     const fileExt = extname(file);
-    if (!ALLOW_TRANSCODE.includes(fileExt)) {
-      log(`Skipping ${file}: not a transcodeable file`);
-      continue;
-    }
+    if (!ALLOW_TRANSCODE.includes(fileExt)) continue;
 
     const video = await MediaFile.init(resolve(absoluteDestinationDir, file));
     const metadata = await video.getDetails();
-    if (!metadata) {
-      log(`Skipping ${file}: failed to get metadata`);
-      continue;
-    }
+    if (!metadata) continue;
 
     // Skip codec or already processed files
     const lowerCodec = metadata.codec.toLowerCase();
@@ -86,7 +105,7 @@ export const transcodeVideos = async (
     // Transcode the file
     const handbrake = await Handbrake.init(video);
     const { data: _, error: transcodeError } = await tryCatch(
-      handbrake.transcode(q),
+      handbrake.transcode(q)
     );
 
     if (transcodeError) {

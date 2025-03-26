@@ -30,15 +30,14 @@ export type Metadata = GenericMetadata & {
 // gets a path's "meta" origin
 const getPathOrigin = (path: string): SourcePath => {
   if (
-    /^[A-Za-z]:\\/.test(path) || // Standard Windows path (e.g., D:\Games\...)
-    /^\/[A-Za-z]\//.test(path) // Git Bash style Windows path (e.g., /d/Games/...)
+    /^[A-Za-z]:\\/.test(path) // Standard Windows path (e.g., D:\Games\...)
   ) {
     return "win32";
   }
 
   // Check for WSL paths (accessed from Windows)
   if (/^\\\\wsl\.localhost\\/.test(path)) {
-    return "unix";
+    return "win32";
   }
 
   // Check for Unix paths
@@ -48,7 +47,7 @@ const getPathOrigin = (path: string): SourcePath => {
 
   // Check for Unix path accessing Windows drives
   if (/^\/mnt\/[a-z]\//.test(path)) {
-    return "win32"; // These are Windows drives accessed from WSL
+    return "unix"; // These are Windows drives accessed from WSL
   }
 
   // Default to unix if nothing matches
@@ -57,7 +56,6 @@ const getPathOrigin = (path: string): SourcePath => {
 
 abstract class File {
   sourcePath: SourcePath; // which OS is the path from
-  sourceStyle: SourceStyle; // which OS can use the path
   unixPath: string; // /mnt/c/videos/video.mp4
   winPath: string; // C:\videos\video.mp4
   dirPath: string; // /mnt/c/videos
@@ -77,7 +75,7 @@ abstract class File {
     this.unixPath = isWin ? winToWsl(absolutePath) : absolutePath;
 
     this.dirPath = dirname(this.unixPath);
-    this.name = basename(cleanAbsolutePath);
+    this.name = basename(this.unixPath);
     this.extension = extname(this.name);
     this.base = basename(this.name, this.extension);
 
@@ -189,13 +187,13 @@ export class MediaFile extends File {
       Promise.all([
         getVideoFormatDetails(this.unixPath), // gets duration, size, overall bitrate
         getVideoStreamDetails(this.unixPath), // gets codec, color profile
-      ]),
+      ])
     );
 
     if (promiseError || !results) {
       log(
         `Error running ffprobe concurrently for ${this.base}: ${promiseError}`,
-        "ERROR",
+        "ERROR"
       );
       return undefined;
     }
@@ -222,7 +220,7 @@ export class MediaFile extends File {
     } else {
       log(
         `ffprobe did not report format bit_rate for ${this.base}, calculating manually.`,
-        "WARN",
+        "WARN"
       );
       // bytes*8 -> bits; /sec -> bps; /1_000_000 -> Mbps
       bitrateInMbps = round((sizeInBytes * 8) / lengthInSeconds / 1_000_000);
@@ -250,7 +248,7 @@ interface VideoFormatDetails {
 }
 
 const getVideoFormatDetails = async (
-  path: string,
+  path: string
 ): Promise<VideoFormatDetails> => {
   try {
     const result =
@@ -272,8 +270,10 @@ const getVideoFormatDetails = async (
     };
   } catch (error: any) {
     log(
-      `Error running ffprobe for format details on ${path}: ${error.message || error}`,
-      "ERROR",
+      `Error running ffprobe for format details on ${path}: ${
+        error.message || error
+      }`,
+      "ERROR"
     );
     throw new Error("Error running ffprobe for format details:", error);
   }
@@ -287,7 +287,7 @@ interface VideoStreamDetails {
 
 // --- Add this new helper function ---
 const getVideoStreamDetails = async (
-  path: string,
+  path: string
 ): Promise<VideoStreamDetails> => {
   try {
     // Select only the first video stream (v:0) and get codec_name, pix_fmt
@@ -310,8 +310,10 @@ const getVideoStreamDetails = async (
     };
   } catch (error: any) {
     log(
-      `Error running ffprobe for stream details on ${path}: ${error.message || error}`,
-      "ERROR",
+      `Error running ffprobe for stream details on ${path}: ${
+        error.message || error
+      }`,
+      "ERROR"
     );
     // Re-throw to be caught by Promise.all or the caller
     throw new Error("Error running ffprobe for stream details:", error);

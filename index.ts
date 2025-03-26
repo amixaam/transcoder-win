@@ -9,12 +9,10 @@ import { transferFiles } from "./transfer-files";
 import {
   acquireLock,
   clearTags,
-  formatMegaBytes,
   getPerformance,
   log,
   readJsonFile,
   releaseLock,
-  sanitizeFilename,
   waitSleepHours,
   type JSONMetadata,
 } from "./utils";
@@ -68,7 +66,6 @@ process.on("SIGTERM", async () => {
 
 async function main() {
   try {
-    log(`Starting transcoder-win: ${Bun.argv[2]!}`);
     await acquireLock();
     await waitSleepHours();
 
@@ -101,10 +98,7 @@ async function main() {
     }
 
     // check if json exists and read it
-    const jsonPath = resolve(
-      METADATA_DIR,
-      `${sanitizeFilename(TORRENT_NAME)}.json`
-    );
+    const jsonPath = resolve(METADATA_DIR, `${TORRENT_NAME}.json`);
 
     const { data: metadata, error: jsonError } = await tryCatch<JSONMetadata>(
       readJsonFile(jsonPath)
@@ -117,13 +111,13 @@ async function main() {
     }
 
     let tempDir = await GenericFile.init(
-      clearTags(join(TEMP_DIR, TORRENT_NAME)),
+      clearTags(join(TEMP_DIR, TORRENT_NAME))
     );
 
     if (source.fileType === "file") {
       const torrentBasename = basename(TORRENT_NAME, extname(TORRENT_NAME));
       tempDir = await GenericFile.init(
-        clearTags(join(TEMP_DIR, torrentBasename)),
+        clearTags(join(TEMP_DIR, torrentBasename))
       );
     }
 
@@ -148,16 +142,9 @@ async function main() {
       stat(tempDir.unixPath)
     );
     if (tempError || !DEVELOPMENT) {
-      log(`Creating temp directory: ${tempDir.unixPath}`);
-
-      const { data: _, error: copyError } = await tryCatch(copyToTempDir());
-      if (copyError) {
-        log(`Error copying files: ${copyError}`, "ERROR");
-        throw copyError;
-      }
+      await copyToTempDir();
     }
 
-    Bun.sleep(1000);
     const originalMetadata = await tempDir.getDetails();
 
     await exportSubtitles(tempDir.unixPath);
@@ -170,23 +157,16 @@ async function main() {
 
     // remove temp directory and .json file
     log(`Removing ${tempDir.unixPath} and ${jsonPath}`);
-    try {
-       await $`rm -rf "${tempDir.unixPath}"`;
-
-       const jsonFile = Bun.file(jsonPath);
-       if (await jsonFile.exists()) {
-         await $`rm "${jsonPath}"`;
-       } else {
-         log(`JSON file ${jsonPath} not found for removal`, "WARN");
-       }
-     } catch (error) {
-       log(`Error removing directory or JSON file: ${error}`, "ERROR");
-    }
+    await $`rm -rf "${tempDir.unixPath}"`;
+    await $`rm "${jsonPath}"`;
 
     log(`SCRIPT FINISHED! Completed in ${getPerformance(now)}`);
 
-    // Calculate and log size Difference
-    if (!originalMetadata || !newMetadata) return;
+    if (!originalMetadata || !newMetadata) {
+      await releaseLock();
+      return;
+    }
+
     log(`size before: ${originalMetadata.size} MB`);
     log(`size after: ${newMetadata.size} MB`);
     log(`size difference: ${originalMetadata.size - newMetadata.size} MB`);
