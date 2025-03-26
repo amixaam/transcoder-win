@@ -38,14 +38,20 @@ export async function getDirectorySize(directoryPath: string): Promise<number> {
   return totalSize;
 }
 
-export function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 Bytes";
+export function formatMegaBytes(megabytes: number): string {
+  if (megabytes === 0) return "0 MB";
 
   const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const sizes = ["MB", "GB", "TB", "PB", "EB"]; // Start with MB
+  let i = 0;
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  let bytes = megabytes * k * k; // Convert MB to Bytes
+
+  if (bytes >= k * k) {
+    i = Math.floor(Math.log(bytes) / Math.log(k)) - 1; // Subtract 2, since we started at MB
+  }
+
+  return parseFloat((bytes / Math.pow(k, i + 2)).toFixed(2)) + " " + sizes[i]; // +2 because we are converting from MB
 }
 
 // Handle paths like /mnt/d/Games/... => D:\Games\...
@@ -105,27 +111,27 @@ export const waitSleepHours = async () => {
   const currentHour = currentTime.getHours();
   const currentMinutes = currentTime.getMinutes();
 
-  if (DEVELOPMENT) {
-    log(`Development: Overwriting sleep timer`, "VERBOSE");
+  if (DEVELOPMENT || SKIP_SLEEP) {
+    log(`Ignoring sleep timer...`, "VERBOSE");
     return;
   }
 
   if (
-    currentHour >= 23 ||
-    currentHour < 7 ||
-    (currentHour === 7 && currentMinutes < 30)
+    currentHour >= SLEEP_FROM_H ||
+    currentHour < SLEEP_TO_H ||
+    (currentHour === SLEEP_TO_H && currentMinutes < SLEEP_TO_M)
   ) {
     // Calculate target time for 7:30 AM
     const target = new Date();
-    target.setHours(7, 30, 0, 0);
+    target.setHours(SLEEP_TO_H, SLEEP_TO_M, 0, 0);
 
     // If it's already past 7:30 AM today, set target to 7:30 AM tomorrow
     if (currentTime > target) {
       target.setDate(target.getDate() + 1);
     }
 
-    // Add a random delay between 1 and 30 seconds
-    const randomDelay = Math.floor(Math.random() * 30) + 1;
+    // Add a random delay between 1 and 40 seconds
+    const randomDelay = Math.floor(Math.random() * 40) + 1;
     target.setSeconds(target.getSeconds() + randomDelay);
 
     // Sleep until the target time
@@ -148,7 +154,7 @@ export const getPerformance = (startTime: number) => {
 
 export const log = async (
   message: string,
-  tag: "LOG" | "WARN" | "ERROR" | "VERBOSE" = "LOG",
+  tag: "LOG" | "WARN" | "ERROR" | "VERBOSE" = "LOG"
 ) => {
   if (!VERBOSE && tag === "VERBOSE") return;
 
@@ -158,7 +164,7 @@ export const log = async (
   const gray = "\x1b[90m";
   const reset = "\x1b[0m";
 
-  let tagColor = yellow;
+  let tagColor = cyan;
   if (tag === "LOG") tagColor = green;
   else if (tag === "WARN") tagColor = yellow;
   else if (tag === "ERROR") tagColor = red;
@@ -203,6 +209,8 @@ export function formatSeconds(totalSeconds: number) {
 }
 
 export const acquireLock = async (): Promise<void> => {
+  const waitForSeconds = LOCK_FILE_SLEEP_TIME * 60 * 1000;
+
   while (true) {
     try {
       // Check if lock file exists
@@ -216,14 +224,17 @@ export const acquireLock = async (): Promise<void> => {
         return;
       } else {
         // Lock already exists
-        log(`Lock file exists, waiting 3 minutes before retry`, "WARN");
-        // Wait 3 minutes (180000 ms)
-        await Bun.sleep(180000);
+        log(
+          `${Bun
+            .argv[3]!} Lock file exists, waiting ${LOCK_FILE_SLEEP_TIME} minutes before retry`,
+          "VERBOSE"
+        );
+        await Bun.sleep(waitForSeconds);
       }
     } catch (error) {
       log(`Error while acquiring lock: ${error}`, "ERROR");
       // Still wait before retrying in case of error
-      await Bun.sleep(180000);
+      await Bun.sleep(waitForSeconds);
     }
   }
 };
@@ -258,7 +269,7 @@ export function sanitizeFilename(filename: string): string {
   sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, "-"); // Control characters
   sanitized = sanitized.replace(
     /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i,
-    "-",
+    "-"
   ); // Reserved names
 
   // Remove or trim leading and trailing spaces
@@ -277,8 +288,9 @@ export function sanitizeFilename(filename: string): string {
 }
 
 export const clearTags = (dirName: string) => {
-  let sanitized = dirName.replace(/\[(.*?)\]/g, "");
-  sanitized = sanitized.replace(" ", "");
+  let sanitized = dirName.replace(/\[(.*?)\]/g, ""); // Remove square brackets and their contents
+  sanitized = sanitized.replace(/\((.*?)\)/g, ""); // Remove parentheses and their contents
+  sanitized = sanitized.replace(/\s+/g, " "); // Replace multiple spaces with single space
   sanitized = sanitized.trim();
   return sanitized;
 };

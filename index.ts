@@ -1,5 +1,5 @@
 import { $ } from "bun";
-import { mkdir, readdir, stat } from "node:fs/promises";
+import { mkdir, stat } from "node:fs/promises";
 import { basename, extname, join, resolve } from "node:path";
 import { exit } from "node:process";
 import { DEVELOPMENT, METADATA_DIR, TEMP_DIR } from "./consts";
@@ -9,15 +9,13 @@ import { transferFiles } from "./transfer-files";
 import {
   acquireLock,
   clearTags,
-  formatBytes,
-  getDirectorySize,
+  formatMegaBytes,
   getPerformance,
   log,
   readJsonFile,
   releaseLock,
   sanitizeFilename,
   waitSleepHours,
-  winToWsl,
   type JSONMetadata,
 } from "./utils";
 import { GenericFile } from "./utils/media-file";
@@ -70,6 +68,7 @@ process.on("SIGTERM", async () => {
 
 async function main() {
   try {
+    log(`Starting transcoder-win: ${Bun.argv[2]!}`);
     await acquireLock();
     await waitSleepHours();
 
@@ -92,7 +91,7 @@ async function main() {
     const { TORRENT_NAME, SOURCE_DIR } = getArgs();
     log(
       `\n[INPUT] torrent name: ${TORRENT_NAME} \n[INPUT] source dir: ${SOURCE_DIR}`,
-      "VERBOSE",
+      "VERBOSE"
     );
 
     // check if source exists
@@ -102,15 +101,18 @@ async function main() {
     }
 
     // check if json exists and read it
-    const jsonPath = resolve(METADATA_DIR, `${TORRENT_NAME}.json`);
+    const jsonPath = resolve(
+      METADATA_DIR,
+      `${sanitizeFilename(TORRENT_NAME)}.json`
+    );
 
     const { data: metadata, error: jsonError } = await tryCatch<JSONMetadata>(
-      readJsonFile(jsonPath),
+      readJsonFile(jsonPath)
     );
     if (jsonError) {
       return log(
         `Metadata file for ${TORRENT_NAME} not found: ${jsonError}`,
-        "ERROR",
+        "ERROR"
       );
     }
 
@@ -127,7 +129,7 @@ async function main() {
 
     log(
       `\n JSONPATH: ${jsonPath} \n SOURCE_DIR: ${source.unixPath} \n TEMPTORRENTDIR: ${tempDir.unixPath}`,
-      "VERBOSE",
+      "VERBOSE"
     );
 
     // copy source files to temp directory
@@ -143,12 +145,19 @@ async function main() {
     };
 
     const { data: _, error: tempError } = await tryCatch(
-      stat(tempDir.unixPath),
+      stat(tempDir.unixPath)
     );
     if (tempError || !DEVELOPMENT) {
-      copyToTempDir();
+      log(`Creating temp directory: ${tempDir.unixPath}`);
+
+      const { data: _, error: copyError } = await tryCatch(copyToTempDir());
+      if (copyError) {
+        log(`Error copying files: ${copyError}`, "ERROR");
+        throw copyError;
+      }
     }
 
+    Bun.sleep(1000);
     const originalMetadata = await tempDir.getDetails();
 
     await exportSubtitles(tempDir.unixPath);
@@ -161,8 +170,18 @@ async function main() {
 
     // remove temp directory and .json file
     log(`Removing ${tempDir.unixPath} and ${jsonPath}`);
-    await $`rm -rf "${tempDir.unixPath}"`;
-    await $`rm "${jsonPath}"`;
+    try {
+       await $`rm -rf "${tempDir.unixPath}"`;
+
+       const jsonFile = Bun.file(jsonPath);
+       if (await jsonFile.exists()) {
+         await $`rm "${jsonPath}"`;
+       } else {
+         log(`JSON file ${jsonPath} not found for removal`, "WARN");
+       }
+     } catch (error) {
+       log(`Error removing directory or JSON file: ${error}`, "ERROR");
+    }
 
     log(`SCRIPT FINISHED! Completed in ${getPerformance(now)}`);
 

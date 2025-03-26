@@ -5,6 +5,7 @@ import { stat, rename } from "node:fs/promises";
 import { $ } from "bun";
 
 export type SourcePath = "win32" | "unix";
+export type SourceStyle = "win32" | "unix";
 export type FileType = "file" | "directory";
 
 export type ColorProfile =
@@ -55,7 +56,8 @@ const getPathOrigin = (path: string): SourcePath => {
 };
 
 abstract class File {
-  sourcePath: SourcePath;
+  sourcePath: SourcePath; // which OS is the path from
+  sourceStyle: SourceStyle; // which OS can use the path
   unixPath: string; // /mnt/c/videos/video.mp4
   winPath: string; // C:\videos\video.mp4
   dirPath: string; // /mnt/c/videos
@@ -75,7 +77,7 @@ abstract class File {
     this.unixPath = isWin ? winToWsl(absolutePath) : absolutePath;
 
     this.dirPath = dirname(this.unixPath);
-    this.name = basename(absolutePath);
+    this.name = basename(cleanAbsolutePath);
     this.extension = extname(this.name);
     this.base = basename(this.name, this.extension);
 

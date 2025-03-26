@@ -31,11 +31,14 @@ async function fileCleanup(absoluteDestinationDir: string): Promise<void> {
 // Main function
 export const transcodeVideos = async (
   absoluteDestinationDir: string,
-  mediaCategory: string,
+  mediaCategory: string
 ) => {
   const files = await readdir(absoluteDestinationDir, { recursive: true });
   let currentDirectory = "";
   let q = DEFAULT_Q;
+
+  log(`absoluteDestinationDir: ${absoluteDestinationDir}`, "VERBOSE");
+  log(`files: ${files.length}`, "VERBOSE");
 
   log("Starting video transcoding process...", "VERBOSE");
 
@@ -45,11 +48,17 @@ export const transcodeVideos = async (
 
     // Skip files that don't need transcoding
     const fileExt = extname(file);
-    if (!ALLOW_TRANSCODE.includes(fileExt)) continue;
+    if (!ALLOW_TRANSCODE.includes(fileExt)) {
+      log(`Skipping ${file}: not a transcodeable file`);
+      continue;
+    }
 
     const video = await MediaFile.init(resolve(absoluteDestinationDir, file));
     const metadata = await video.getDetails();
-    if (!metadata) continue;
+    if (!metadata) {
+      log(`Skipping ${file}: failed to get metadata`);
+      continue;
+    }
 
     // Skip codec or already processed files
     const lowerCodec = metadata.codec.toLowerCase();
