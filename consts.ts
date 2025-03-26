@@ -38,15 +38,12 @@ export const KEEP_LANGUAGE_CODES = [
 export const SUBTITLE_PRESET = "subs.json"; // ./presets/subs.json
 export const NO_SUBTITLE_PRESET = "no-subs.json"; // ./presets/no-subs.json
 
-// what these presets are named. You can check this in the preset .json file's "PresetName" property
-export const SUBTITLE_PRESET_NAME = "AMD SUBS";
-export const NO_SUBTITLE_PRESET_NAME = "AMD NO-SUBS";
-
 // default quality value if trying to get the best one automatically fails
 export const DEFAULT_Q = 25;
 
-// when trying for best quality, encode videos for this many seconds. automatically shortens if source is shorter.
-export const TEST_ENCODE_FOR_SECONDS = 90;
+// when trying for best quality, sample n times for m seconds spread evenly across the source. automatically shortens if source is shorter.
+export const SAMPLES = 10;
+export const SAMPLE_LENGTH = 10;
 
 // processes all media to .mp4
 export const SKIP_TRANSCODE_CODECS = ["av1"]; // skips transcoding for these codecs
@@ -60,7 +57,7 @@ export const ALLOW_TRANSCODE = [
 ];
 export const EIGHT_BIT_COLOR_PROFILES = ["yuv420p", "yuv444p"]; // uses x265, any other color profile encoded with 10bit color
 
-export const HARDWARE_ACCEL_TYPE: string = "vcn"; // leave empty to disable. vcn - AMD
+export const HARDWARE_ACCEL_TYPE: string = "vcn"; // leave empty to disable. vcn - AMD, Toolbox - Apple
 export const hwAccel_h265_10 = "vce_h265_10bit";
 export const hwAccel_h265 = "vce_h265";
 export const software_h265 = "x265";
@@ -107,4 +104,4 @@ export const LOCK_FILE_SLEEP_TIME = 15;
 const TRANSFER_TO_USER = "roberts";
 const TRANSFER_TO_IP = "192.168.2.11";
 export const TRANSFER_TO = `${TRANSFER_TO_USER}@${TRANSFER_TO_IP}`;
-export const DEFAULT_TRANSFER_DIR = "/media/roberts/jellyfin/media/UNSORTED";
+export const TRANSFER_DIR = "/media/roberts/jellyfin/media/UNSORTED";

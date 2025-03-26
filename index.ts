@@ -95,8 +95,8 @@ async function main() {
     );
 
     // check if source exists
-    const source = new GenericFile(SOURCE_DIR);
-    if (!(await source.exists())) {
+    const source = await GenericFile.init(SOURCE_DIR);
+    if (!source.exists) {
       return log(`Source directory does not exist`, "ERROR");
     }
 
@@ -116,15 +116,15 @@ async function main() {
       );
     }
 
-    let cleanTorrentName = sanitizeFilename(TORRENT_NAME);
-    cleanTorrentName = clearTags(cleanTorrentName);
+    let tempDir = await GenericFile.init(
+      clearTags(join(TEMP_DIR, TORRENT_NAME)),
+    );
 
-    let tempDir = new GenericFile(join(TEMP_DIR, cleanTorrentName));
-
-    if ((await source.fileType()) === "file") {
+    if (source.fileType === "file") {
       const torrentBasename = basename(TORRENT_NAME, extname(TORRENT_NAME));
-      const cleanBasename = sanitizeFilename(clearTags(torrentBasename));
-      tempDir = new GenericFile(join(TEMP_DIR, cleanBasename));
+      tempDir = await GenericFile.init(
+        clearTags(join(TEMP_DIR, torrentBasename)),
+      );
     }
 
     log(
@@ -137,7 +137,7 @@ async function main() {
       await mkdir(tempDir.unixPath, { recursive: true });
 
       log(`Copying ${source.unixPath} to ${tempDir.unixPath}`);
-      if ((await source.fileType()) === "file") {
+      if (source.fileType === "file") {
         await $`cp "${source.unixPath}" "${tempDir.unixPath}"`;
       } else {
         await $`cp -a "${source.unixPath}/." "${tempDir.unixPath}"`;
@@ -164,56 +164,33 @@ async function main() {
     Bun.sleep(2000);
     await transcodeVideos(tempDir.unixPath, metadata.category);
     Bun.sleep(2000);
-    // await transferFiles(tempDir.unixPath, metadata);
+    await transferFiles(tempDir.unixPath, metadata);
 
     const newMetadata = await tempDir.getDetails();
 
     // remove temp directory and .json file
     log(`Removing ${tempDir.unixPath} and ${jsonPath}`);
-    // try {
-    //   await $`rm -rf "${tempDir.unixPath}"`;
+    try {
+       await $`rm -rf "${tempDir.unixPath}"`;
 
-    //   const jsonFile = Bun.file(jsonPath);
-    //   if (await jsonFile.exists()) {
-    //     await $`rm "${jsonPath}"`;
-    //   } else {
-    //     log(`JSON file ${jsonPath} not found for removal`, "WARN");
-    //   }
-    // } catch (error) {
-    //   log(`Error removing directory or JSON file: ${error}`, "ERROR");
-    // }
+       const jsonFile = Bun.file(jsonPath);
+       if (await jsonFile.exists()) {
+         await $`rm "${jsonPath}"`;
+       } else {
+         log(`JSON file ${jsonPath} not found for removal`, "WARN");
+       }
+     } catch (error) {
+       log(`Error removing directory or JSON file: ${error}`, "ERROR");
+    }
 
     log(`SCRIPT FINISHED! Completed in ${getPerformance(now)}`);
 
     // Calculate and log size Difference
     if (!originalMetadata || !newMetadata) return;
-    const sizeDifference = originalMetadata.size - newMetadata.size;
-    const percentChange = (
-      (sizeDifference / originalMetadata.size) *
-      100
-    ).toFixed(2);
-
-    if (sizeDifference > 0) {
-      log(
-        `Size stats: \nOriginal: ${formatMegaBytes(
-          originalMetadata.size
-        )} \nNew: ${formatMegaBytes(
-          newMetadata.size
-        )} \nSize Difference: ${formatMegaBytes(
-          sizeDifference
-        )} \nPercent Change: ${percentChange}% smaller \n`
-      );
-    } else {
-      log(
-        `Size stats: \n Original: ${formatMegaBytes(
-          originalMetadata.size
-        )} \n New: ${formatMegaBytes(
-          newMetadata.size
-        )} \n Size Difference: ${formatMegaBytes(
-          Math.abs(sizeDifference)
-        )} \n Percent Change: ${Math.abs(Number(percentChange))}% larger \n`
-      );
-    }
+    log(`size before: ${originalMetadata.size} MB`);
+    log(`size after: ${newMetadata.size} MB`);
+    log(`size difference: ${originalMetadata.size - newMetadata.size} MB`);
+    log("-------------------------------------");
 
     await releaseLock();
   } catch (error) {
