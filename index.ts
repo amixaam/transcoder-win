@@ -2,7 +2,13 @@ import { $ } from "bun";
 import { mkdir, stat } from "node:fs/promises";
 import { basename, extname, join, resolve } from "node:path";
 import { exit } from "node:process";
-import { DEVELOPMENT, METADATA_DIR, SOURCE_DIR, TEMP_DIR } from "./consts";
+import {
+  DEFAULT_JSON,
+  DEVELOPMENT,
+  METADATA_DIR,
+  SOURCE_DIR,
+  TEMP_DIR,
+} from "./consts";
 import { exportSubtitles } from "./export-subs";
 import { transcodeVideos } from "./transcode-videos";
 import { transferFiles } from "./transfer-files";
@@ -38,6 +44,7 @@ import { tryCatch } from "./utils/try-catch";
 // 7. Move files into destination directory
 // 8. Remove temp directory
 // 9. Release lock
+//
 
 const cleanup = async (exitCode = 0) => {
   log(`Cleaning up before exit with code ${exitCode}`, "WARN");
@@ -98,14 +105,17 @@ async function main() {
     // check if json exists and read it
     const jsonPath = resolve(METADATA_DIR, `${TORRENT_NAME}.json`);
 
-    const { data: metadata, error: jsonError } = await tryCatch<JSONMetadata>(
+    let metadata: JSONMetadata = DEFAULT_JSON;
+    const { data: jsonData, error: jsonError } = await tryCatch<JSONMetadata>(
       readJsonFile(jsonPath),
     );
     if (jsonError) {
-      return log(
-        `Metadata file for ${TORRENT_NAME} not found: ${jsonError}`,
-        "ERROR",
+      log(
+        `Metadata file for ${TORRENT_NAME} not found: ${jsonError}. using default values: category = "anime", torrent_type = "new"`,
+        "WARN",
       );
+    } else {
+      metadata = jsonData;
     }
 
     let tempDir = await GenericFile.init(

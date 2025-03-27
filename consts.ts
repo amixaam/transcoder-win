@@ -1,4 +1,5 @@
 import { dirname, resolve } from "node:path";
+import type { JSONMetadata } from "./utils";
 
 // works with sources being sent as a windows path
 // if any path below is the opposite path (windows vs WSL), then it will probably error.
@@ -50,6 +51,16 @@ export const KEEP_LANGUAGE_CODES = [
   "zxx", // signs & songs
   "und", // undefined
 ];
+
+export const DEFAULT_JSON: JSONMetadata = {
+  media_output_directory: "",
+  json_output_directory: "",
+  torrent_type: "new",
+  category: "anime",
+  hash: "",
+  name: "",
+  size: "",
+};
 
 // subtitle presets should be within ./presets/
 export const SUBTITLE_PRESET = "subs.json"; // ./presets/subs.json
