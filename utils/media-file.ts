@@ -29,24 +29,28 @@ export type Metadata = GenericMetadata & {
 
 // gets a path's "meta" origin
 const getPathOrigin = (path: string): SourcePath => {
+  // Remove surrounding quotes
+  const normalizedPath =
+    path.startsWith("'") && path.endsWith("'") ? path.slice(1, -1) : path;
+
   if (
-    /^[A-Za-z]:\\/.test(path) // Standard Windows path (e.g., D:\Games\...)
+    /^[A-Za-z]:\\/.test(normalizedPath) // Standard Windows path (e.g., D:\Games\...)
   ) {
     return "win32";
   }
 
   // Check for WSL paths (accessed from Windows)
-  if (/^\\\\wsl\.localhost\\/.test(path)) {
+  if (/^\\\\wsl\.localhost\\/.test(normalizedPath)) {
     return "win32";
   }
 
   // Check for Unix paths
-  if (/^\/(?!mnt\/[a-z]\/).+/.test(path)) {
+  if (/^\/(?!mnt\/[a-z]\/).+/.test(normalizedPath)) {
     return "unix";
   }
 
   // Check for Unix path accessing Windows drives
-  if (/^\/mnt\/[a-z]\//.test(path)) {
+  if (/^\/mnt\/[a-z]\//.test(normalizedPath)) {
     return "unix"; // These are Windows drives accessed from WSL
   }
 
@@ -68,11 +72,13 @@ abstract class File {
   exists: boolean = false;
 
   protected constructor(absolutePath: string, type: FileType, exists: boolean) {
-    this.sourcePath = getPathOrigin(absolutePath);
+    const cleanAbsolutePath = absolutePath.replace(/^'|'$/g, "");
+
+    this.sourcePath = getPathOrigin(cleanAbsolutePath);
     const isWin = this.sourcePath === "win32";
 
-    this.winPath = isWin ? absolutePath : wslToWin(absolutePath);
-    this.unixPath = isWin ? winToWsl(absolutePath) : absolutePath;
+    this.winPath = isWin ? cleanAbsolutePath : wslToWin(cleanAbsolutePath);
+    this.unixPath = isWin ? winToWsl(cleanAbsolutePath) : cleanAbsolutePath;
 
     this.dirPath = dirname(this.unixPath);
     this.name = basename(this.unixPath);
@@ -94,10 +100,12 @@ abstract class File {
   }
 
   protected static async performInit(absolutePath: string) {
-    const sourcePath = getPathOrigin(absolutePath);
+    const cleanAbsolutePath = absolutePath.replace(/^'|'$/g, "");
+
+    const sourcePath = getPathOrigin(cleanAbsolutePath);
     const isWin = sourcePath === "win32";
 
-    const unixPath = isWin ? winToWsl(absolutePath) : absolutePath;
+    const unixPath = isWin ? winToWsl(cleanAbsolutePath) : cleanAbsolutePath;
 
     let exists = true;
     const { data, error } = await tryCatch(stat(unixPath));

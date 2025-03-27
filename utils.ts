@@ -144,7 +144,7 @@ export const getPerformance = (startTime: number) => {
 
 export const log = async (
   message: string,
-  tag: "LOG" | "WARN" | "ERROR" | "VERBOSE" = "LOG",
+  tag: "LOG" | "WARN" | "ERROR" | "VERBOSE" = "LOG"
 ) => {
   if (!VERBOSE && tag === "VERBOSE") return;
 
@@ -152,10 +152,11 @@ export const log = async (
   const green = "\x1b[32m";
   const red = "\x1b[31m";
   const gray = "\x1b[90m";
+  const cyan = "\x1b[36m";
   const reset = "\x1b[0m";
 
-  let tagColor = yellow;
-  if (tag === "LOG") tagColor = green;
+  let tagColor = green;
+  if (tag === "LOG") tagColor = cyan;
   else if (tag === "WARN") tagColor = yellow;
   else if (tag === "ERROR") tagColor = red;
 
@@ -253,7 +254,7 @@ export function sanitizeFilename(filename: string): string {
   sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, "-"); // Control characters
   sanitized = sanitized.replace(
     /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i,
-    "-",
+    "-"
   ); // Reserved names
 
   // Remove or trim leading and trailing spaces

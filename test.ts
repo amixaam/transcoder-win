@@ -19,15 +19,15 @@ const path = "/Users/robertsbrinkis/Downloads/Specials/Konosuba.mp4";
 
 // input
 
-const video = await MediaFile.init(Bun.argv[3]!);
+const video = await MediaFile.init(Bun.argv[2]!);
+console.log(await video.getDetails());
+
 const handbrake = await Handbrake.init(video);
 await handbrake.sample({
-  quality: DEFAULT_Q,
+  quality: 22,
   samples: SAMPLES,
   sampleLength: SAMPLE_LENGTH,
 });
 
-console.log(await video.getDetails());
-
-const res = await handbrake.transcode(DEFAULT_Q);
+const res = await handbrake.transcode(22);
 console.log(await res.getDetails());

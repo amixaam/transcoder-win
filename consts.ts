@@ -5,7 +5,7 @@ import type { JSONMetadata } from "./utils";
 // if any path below is the opposite path (windows vs WSL), then it will probably error.
 
 // if using windows with WSL, pick mixed, if only unix based systems, pick unix
-export const RUN_TYPE: "mixed" | "unix" = "unix";
+export const RUN_TYPE: "mixed" | "unix" = "mixed";
 
 export const BASE_DIR = resolve(dirname(Bun.argv[1]!));
 export const PRESET_DIR = resolve(BASE_DIR, "presets/");
@@ -17,19 +17,21 @@ export const LOCK_FILE = resolve(BASE_DIR, "lockfile.lock");
 // only uses media_output_directory, torrent_type (in transfer-files.ts) and category (transcode-videos.ts).
 
 // My Windows settings
-// export const METADATA_DIR = "/mnt/d/TORRENT/TEMP";
-// export const TEMP_DIR = "/mnt/d/TORRENT/TEMP/MEDIA";
-// export const CALL_HANDBRAKE = [
-//   `cmd.exe`,
-//   "/c",
-//   "C:\\Users\\Roberts\\HandBrakeCLI.exe",
-// ]; // how to call handbrake, might depend on your situation
+export const METADATA_DIR = "/mnt/d/TORRENT/TEMP";
+export const TEMP_DIR = "/mnt/d/TORRENT/TEMP/MEDIA";
+export const SOURCE_BASE_DIR = "/mnt/d/TORRENT/MEDIA"; // unix style path
+
+export const CALL_HANDBRAKE = [
+  `cmd.exe`,
+  "/c",
+  "C:\\Users\\Roberts\\HandBrakeCLI.exe",
+]; // how to call handbrake, might depend on your situation
 
 // My macOS settings
-export const METADATA_DIR = resolve(BASE_DIR, "metadata/");
-export const TEMP_DIR = resolve(BASE_DIR, "temp/");
-export const SOURCE_BASE_DIR = "/Users/robertsbrinkis/Documents/torrents/"; // unix style path
-export const CALL_HANDBRAKE = ["HandBrakeCLI"]; // how to call handbrake, might depend on your situation
+// export const METADATA_DIR = resolve(BASE_DIR, "metadata/");
+// export const TEMP_DIR = resolve(BASE_DIR, "temp/");
+// export const SOURCE_BASE_DIR = "/Users/robertsbrinkis/Documents/torrents/"; // unix style path
+// export const CALL_HANDBRAKE = ["HandBrakeCLI"]; // how to call handbrake, might depend on your situation
 
 export const SOURCE_DIR = resolve(SOURCE_BASE_DIR, Bun.argv[2]!);
 
@@ -63,15 +65,15 @@ export const DEFAULT_JSON: JSONMetadata = {
 };
 
 // subtitle presets should be within ./presets/
-export const SUBTITLE_PRESET = "subs.json"; // ./presets/subs.json
-export const NO_SUBTITLE_PRESET = "no-subs.json"; // ./presets/no-subs.json
+export const SUBTITLE_PRESET = "subs-mkv.json"; // ./presets/subs.json
+export const NO_SUBTITLE_PRESET = "no-subs-mkv.json"; // ./presets/no-subs.json
 
 // default quality value if trying to get the best one automatically fails
 export const DEFAULT_Q = 25;
 
 // when trying for best quality, sample n times for m seconds spread evenly across the source. automatically shortens if source is shorter.
 export const SAMPLES = 10;
-export const SAMPLE_LENGTH = 7;
+export const SAMPLE_LENGTH = 10;
 
 // processes all media to .mp4
 export const SKIP_TRANSCODE_CODECS = ["av1"]; // skips transcoding for these codecs
@@ -88,14 +90,14 @@ export const EIGHT_BIT_COLOR_PROFILES = ["yuv420p", "yuv444p"]; //these are 8bit
 export const TO_CONTAINER = ".mkv"; // end result will be in this container, MUST include the dot
 
 // My Windows settings
-// export const HARDWARE_ACCEL_TYPE: string = "vcn"; // leave empty to disable. vcn - AMD, Toolbox - Apple
-// export const hwAccel_h265_10 = "vce_h265_10bit";
-// export const hwAccel_h265 = "vce_h265";
+export const HARDWARE_ACCEL_TYPE: string = "vcn"; // leave empty to disable. vcn - AMD, Toolbox - Apple
+export const hwAccel_h265_10 = "vce_h265_10bit";
+export const hwAccel_h265 = "vce_h265";
 
 // My macOS settings
-export const HARDWARE_ACCEL_TYPE: string = "Toolbox"; // leave empty to disable. vcn - AMD, Toolbox - Apple
-export const hwAccel_h265_10 = "vt_h265_10bit";
-export const hwAccel_h265 = "vt_h265";
+// export const HARDWARE_ACCEL_TYPE: string = "Toolbox"; // leave empty to disable. vcn - AMD, Toolbox - Apple
+// export const hwAccel_h265_10 = "vt_h265_10bit";
+// export const hwAccel_h265 = "vt_h265";
 
 export const software_h265 = "x265";
 export const software_h265_10 = "x265_10bit";
@@ -105,14 +107,14 @@ export const software_h265_10 = "x265_10bit";
 // allows bitrate to be below the min if source is below the min aswell.
 // change the ranges to fit your needs / network speed
 export const BITRATE_RANGES = {
-  Anime: [1, 2.5],
-  Shows: [2, 4],
-  Movies: [3, 6],
+  Anime: [1, 3.5],
+  Shows: [2, 4.25],
+  Movies: [2, 6],
 };
 
 // After transcoding, only keep these extensions, delete rest
 export const KEEP_FILES_WITH_EXTENSION = [
-  ".mp4",
+  ".mkv",
   ".ass",
   ".srt",
   ".usf",

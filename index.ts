@@ -93,7 +93,7 @@ async function main() {
 
     log(
       `\n[INPUT] torrent name: ${TORRENT_NAME} \n[INPUT] source dir: ${SOURCE_DIR}`,
-      "VERBOSE",
+      "VERBOSE"
     );
 
     // check if source exists
@@ -107,31 +107,31 @@ async function main() {
 
     let metadata: JSONMetadata = DEFAULT_JSON;
     const { data: jsonData, error: jsonError } = await tryCatch<JSONMetadata>(
-      readJsonFile(jsonPath),
+      readJsonFile(jsonPath)
     );
     if (jsonError) {
       log(
         `Metadata file for ${TORRENT_NAME} not found: ${jsonError}. using default values: category = "anime", torrent_type = "new"`,
-        "WARN",
+        "WARN"
       );
     } else {
       metadata = jsonData;
     }
 
     let tempDir = await GenericFile.init(
-      clearTags(join(TEMP_DIR, TORRENT_NAME)),
+      clearTags(join(TEMP_DIR, TORRENT_NAME))
     );
 
     if (source.fileType === "file") {
       const torrentBasename = basename(TORRENT_NAME, extname(TORRENT_NAME));
       tempDir = await GenericFile.init(
-        clearTags(join(TEMP_DIR, torrentBasename)),
+        clearTags(join(TEMP_DIR, torrentBasename))
       );
     }
 
     log(
       `\n JSONPATH: ${jsonPath} \n SOURCE_DIR: ${source.unixPath} \n TEMPTORRENTDIR: ${tempDir.unixPath}`,
-      "VERBOSE",
+      "VERBOSE"
     );
 
     // copy source files to temp directory
@@ -147,7 +147,7 @@ async function main() {
     };
 
     const { data: _, error: tempError } = await tryCatch(
-      stat(tempDir.unixPath),
+      stat(tempDir.unixPath)
     );
     if (tempError || !DEVELOPMENT) {
       await copyToTempDir();
@@ -166,7 +166,11 @@ async function main() {
     // remove temp directory and .json file
     log(`Removing ${tempDir.unixPath} and ${jsonPath}`);
     await $`rm -rf "${tempDir.unixPath}"`;
-    await $`rm "${jsonPath}"`;
+    try {
+      await $`rm "${jsonPath}"`;
+    } catch (error) {
+      log(`Error removing json file: ${error}`, "ERROR");
+    }
 
     log(`SCRIPT FINISHED! Completed in ${getPerformance(now)}`);
 

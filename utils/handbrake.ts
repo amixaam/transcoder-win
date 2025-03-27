@@ -28,6 +28,8 @@ export type TranscodeSettings = {
   softwareEncoder: string;
   preset: GenericFile;
   presetName: string;
+  samplePreset: GenericFile;
+  samplePresetName: string;
 };
 
 export type RunCommandOptions = {
@@ -45,23 +47,26 @@ export class Handbrake {
   private constructor(
     video: MediaFile,
     metadata: Metadata,
-    settings: TranscodeSettings,
+    settings: TranscodeSettings
   ) {
     this.video = video;
     this.metadata = metadata;
     this.settings = settings;
   }
 
-  private static async getSettings(video: MediaFile, metadata: Metadata) {
+  private static async getSettings(
+    video: MediaFile,
+    metadata: Metadata
+  ): Promise<TranscodeSettings> {
     // output
     const outputFileName = `${video.base}_HBPROCESSED${TO_CONTAINER}`;
     const outputVideo = await MediaFile.init(
-      join(video.dirPath, outputFileName),
+      join(video.dirPath, outputFileName)
     );
 
     // encoding settings
     const hardwareEncoder = EIGHT_BIT_COLOR_PROFILES.includes(
-      metadata.colorProfile,
+      metadata.colorProfile
     )
       ? hwAccel_h265
       : hwAccel_h265_10;
@@ -70,18 +75,19 @@ export class Handbrake {
 
     const presetDirPath = await GenericFile.init(PRESET_DIR);
     const subtitlePreset = await GenericFile.init(
-      join(presetDirPath.unixPath, SUBTITLE_PRESET),
+      join(presetDirPath.unixPath, SUBTITLE_PRESET)
     );
     const noSubtitlePreset = await GenericFile.init(
-      join(presetDirPath.unixPath, NO_SUBTITLE_PRESET),
+      join(presetDirPath.unixPath, NO_SUBTITLE_PRESET)
     );
 
     // preset
     // const preset =
     //   video.extension === ".mkv" ? noSubtitlePreset : subtitlePreset;
     const preset = subtitlePreset;
+    const samplePreset = noSubtitlePreset;
 
-    const getPresetName = async () => {
+    const getPresetName = async (preset: GenericFile) => {
       const presetFile = Bun.file(preset.unixPath);
       const isFile = await presetFile.exists();
       if (!isFile) {
@@ -94,7 +100,8 @@ export class Handbrake {
       return presetName;
     };
 
-    const presetName = await getPresetName();
+    const presetName = await getPresetName(preset);
+    const samplePresetName = await getPresetName(samplePreset);
 
     return {
       outputVideo,
@@ -102,6 +109,8 @@ export class Handbrake {
       softwareEncoder,
       preset,
       presetName,
+      samplePreset,
+      samplePresetName,
     };
   }
 
@@ -109,7 +118,7 @@ export class Handbrake {
     const metadata = await video.getDetails();
     if (!metadata) {
       throw new Error(
-        `Failed to get video metadata for ${video.base}. Cannot initialize Handbrake.`,
+        `Failed to get video metadata for ${video.base}. Cannot initialize Handbrake.`
       );
     }
 
@@ -149,29 +158,30 @@ export class Handbrake {
       RUN_TYPE === "unix"
         ? options.outputVideo.unixPath
         : options.outputVideo.winPath;
-    const presetPath =
-      RUN_TYPE === "unix"
-        ? this.settings.preset.unixPath
-        : this.settings.preset.winPath;
 
-    const baseArgs = [
-      ...CALL_HANDBRAKE,
-      "--preset-import-file",
-      presetPath,
-      "-Z",
-      this.settings.presetName,
-      "-i",
-      inputPath,
-      "-o",
-      outputPath,
-    ];
+    const baseArgs = [...CALL_HANDBRAKE, "-i", inputPath, "-o", outputPath];
 
     if (options.start && options.duration) {
       baseArgs.push(
+        "--preset-import-file",
+        RUN_TYPE === "unix"
+          ? this.settings.samplePreset.unixPath
+          : this.settings.samplePreset.winPath,
+        "-Z",
+        this.settings.samplePresetName,
         "--start-at",
         `seconds:${options.start}`,
         "--stop-at",
-        `seconds:${options.duration}`,
+        `seconds:${options.duration}`
+      );
+    } else {
+      baseArgs.push(
+        "--preset-import-file",
+        RUN_TYPE === "unix"
+          ? this.settings.preset.unixPath
+          : this.settings.preset.winPath,
+        "-Z",
+        this.settings.presetName
       );
     }
 
@@ -202,23 +212,36 @@ export class Handbrake {
           stderr: "pipe",
         });
 
+        // // Capture stdout
+        // (async () => {
+        //   for await (const chunk of proc.stdout) {
+        //     console.log(`${new TextDecoder().decode(chunk)}`);
+        //   }
+        // })();
+
+        // // Capture stderr
+        // (async () => {
+        //   for await (const chunk of proc.stderr) {
+        //     console.error(`${new TextDecoder().decode(chunk)}`);
+        //   }
+        // })();
+
         const exitCode = await proc.exited;
 
         if (exitCode === 0) {
-          log(`Handbrake (${strat.name}) for ${outputName} succeeded!`);
           await Bun.sleep(2500);
 
           return;
         } else {
           lastError = new Error(
-            `Handbrake (${strat.name}) for ${outputName} failed with exit code ${exitCode}.`,
+            `Handbrake (${strat.name}) for ${outputName} failed with exit code ${exitCode}.`
           );
           log(lastError.message, "WARN");
         }
       } catch (error: any) {
         // Catch errors during spawn itself (e.g., command not found)
         lastError = new Error(
-          `Failed to spawn Handbrake (${strat.name}) for ${outputName}: ${error.message}`,
+          `Failed to spawn Handbrake (${strat.name}) for ${outputName}: ${error.message}`
         );
         log(lastError.message, "WARN");
       }
@@ -237,8 +260,8 @@ export class Handbrake {
 
     log(
       `Transcode completed in ${formatSeconds(
-        (performance.now() - now) / 1000,
-      )}`,
+        (performance.now() - now) / 1000
+      )}`
     );
 
     return this.settings.outputVideo;
@@ -268,13 +291,13 @@ export class Handbrake {
       return await MediaFile.init(
         join(
           this.video.dirPath,
-          `${this.settings.outputVideo.base}_${n}${TO_CONTAINER}`,
-        ),
+          `${this.settings.outputVideo.base}_${n}${TO_CONTAINER}`
+        )
       );
     };
 
     log(
-      `Running sample with ${options.samples} samples of ${sampleLength} seconds each at q=${options.quality}...`,
+      `Running sample with ${options.samples} samples of ${sampleLength} seconds each at q=${options.quality}...`
     );
 
     const timeTable: { start: number; duration: number; output: MediaFile }[] =
@@ -315,14 +338,14 @@ export class Handbrake {
         totalBitrate += stats.bitrate;
         totalSize += stats.size;
         successfulSamples++;
-        //   log(
-        //     `Sample #${sample} completed in ${runtime}. Bitrate: ${stats.bitrate} Mb/s. Size: ${stats.size} MB`,
-        //   );
-        // } else {
-        //   log(
-        //     `Sample #${sample} failed to get valid stats (${runtime}). Excluding from average.`,
-        //     "WARN",
-        //   );
+        log(
+          `Sample #${sample} completed in ${runtime}. Bitrate: ${stats.bitrate} Mb/s. Size: ${stats.size} MB`
+        );
+      } else {
+        log(
+          `Sample #${sample} failed to get valid stats (${runtime}). Excluding from average.`,
+          "WARN"
+        );
       }
       await time.output.delete();
     }
@@ -336,8 +359,8 @@ export class Handbrake {
 
     log(
       `Handbrake sample completed. Estimated size: ${round(
-        (avgBitrate * this.metadata.length) / 8,
-      )} MB. Average bitrate: ${avgBitrate} Mb/s. Average size: ${avgSize} MB`,
+        (avgBitrate * this.metadata.length) / 8
+      )} MB. Average bitrate: ${avgBitrate} Mb/s. Average size: ${avgSize} MB`
     );
 
     return {
