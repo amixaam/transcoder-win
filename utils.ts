@@ -44,16 +44,6 @@ export async function getDirectorySize(directoryPath: string): Promise<number> {
   return totalSize;
 }
 
-export function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 Bytes";
-
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-}
-
 // Handle paths like /mnt/d/Games/... => D:\Games\...
 // Handle paths like /home/roberts/... => \\wsl.localhost\Ubuntu-24.04\home\roberts\...
 export const wslToWin = (wslPath: string): string => {
@@ -154,7 +144,7 @@ export const getPerformance = (startTime: number) => {
 
 export const log = async (
   message: string,
-  tag: "LOG" | "WARN" | "ERROR" | "VERBOSE" = "LOG"
+  tag: "LOG" | "WARN" | "ERROR" | "VERBOSE" = "LOG",
 ) => {
   if (!VERBOSE && tag === "VERBOSE") return;
 
@@ -209,6 +199,7 @@ export function formatSeconds(totalSeconds: number) {
 }
 
 export const acquireLock = async (): Promise<void> => {
+  log("Acquiring lock...");
   while (true) {
     try {
       // Check if lock file exists
@@ -221,8 +212,6 @@ export const acquireLock = async (): Promise<void> => {
         log(`Lock acquired: ${LOCK_FILE}`);
         return;
       } else {
-        // Lock already exists
-        log(`Lock file exists, waiting 3 minutes before retry`, "WARN");
         // Wait 3 minutes (180000 ms)
         await Bun.sleep(180000);
       }
@@ -264,7 +253,7 @@ export function sanitizeFilename(filename: string): string {
   sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, "-"); // Control characters
   sanitized = sanitized.replace(
     /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i,
-    "-"
+    "-",
   ); // Reserved names
 
   // Remove or trim leading and trailing spaces

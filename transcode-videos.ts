@@ -5,6 +5,7 @@ import {
   DEFAULT_Q,
   KEEP_FILES_WITH_EXTENSION,
   SKIP_TRANSCODE_CODECS,
+  TO_CONTAINER,
 } from "./consts";
 import { log, waitSleepHours } from "./utils";
 import { GenericFile, MediaFile } from "./utils/media-file";
@@ -18,13 +19,13 @@ async function fileCleanup(absoluteDestinationDir: string): Promise<void> {
   const files = await readdir(absoluteDestinationDir, { recursive: true });
   for await (const filePath of files) {
     const file = await GenericFile.init(
-      resolve(absoluteDestinationDir, filePath)
+      resolve(absoluteDestinationDir, filePath),
     );
     if (file.fileType === "directory") continue;
 
     if (
       !KEEP_FILES_WITH_EXTENSION.includes(file.extension) ||
-      (file.extension === ".mp4" && !file.base.endsWith("_HBPROCESSED"))
+      (file.extension === TO_CONTAINER && !file.base.endsWith("_HBPROCESSED"))
     ) {
       await unlink(file.unixPath);
       log(`Deleted: ${file.name}`);
@@ -39,13 +40,13 @@ async function fileCleanup(absoluteDestinationDir: string): Promise<void> {
 
   for await (const filePath of processedFiles) {
     const file = await GenericFile.init(
-      resolve(absoluteDestinationDir, filePath)
+      resolve(absoluteDestinationDir, filePath),
     );
 
     if (file.fileType === "directory") continue;
 
     if (file.base.endsWith("_HBPROCESSED")) {
-      const newFileName = file.name.replace("_HBPROCESSED.mp4", ".mp4");
+      const newFileName = file.name.replace("_HBPROCESSED", "");
 
       const newFileUnixPath = join(file.dirPath, newFileName);
 
@@ -59,7 +60,7 @@ async function fileCleanup(absoluteDestinationDir: string): Promise<void> {
 // Main function
 export const transcodeVideos = async (
   absoluteDestinationDir: string,
-  mediaCategory: string
+  mediaCategory: string,
 ) => {
   const files = await readdir(absoluteDestinationDir, { recursive: true });
   let currentDirectory = "";
@@ -105,7 +106,7 @@ export const transcodeVideos = async (
     // Transcode the file
     const handbrake = await Handbrake.init(video);
     const { data: _, error: transcodeError } = await tryCatch(
-      handbrake.transcode(q)
+      handbrake.transcode(q),
     );
 
     if (transcodeError) {

@@ -36,5 +36,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 presets/*
 temp_media/*
 metadata/*
+temp/*
 transcoder-win.log
 lockfile.lock

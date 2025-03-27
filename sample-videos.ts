@@ -14,7 +14,7 @@ const getBitrateRange = (category: string) => {
 // using binary search, finds the best quality value for a video
 export const findBestQuality = async (
   video: MediaFile,
-  category: string
+  category: string,
 ): Promise<number> => {
   // binary search
   //
@@ -41,16 +41,16 @@ export const findBestQuality = async (
 
   log(
     `Source size: ${metadata.size} MB, Bitrate: ${metadata.bitrate} Mb/s`,
-    "VERBOSE"
+    "VERBOSE",
   );
 
-  while (low < high && attempts < 6 && Math.abs(high - low) > 0.3) {
-    attempts--;
+  while (low < high && attempts < 6 && Math.abs(high - low) >= 0.3) {
+    attempts++;
 
     log("next sample -------------->");
     log(
       `attempt: #${attempts}, low: ${low}, high: ${high}, mid: ${mid}, best: ${best}, bestBitrate: ${bestBitrate}`,
-      "VERBOSE"
+      "VERBOSE",
     );
 
     const { data, error } = await tryCatch(
@@ -58,7 +58,7 @@ export const findBestQuality = async (
         quality: mid,
         samples: SAMPLES,
         sampleLength: SAMPLE_LENGTH,
-      })
+      }),
     );
 
     if (error) {
@@ -82,7 +82,7 @@ export const findBestQuality = async (
         best = mid;
         log(
           `New best bitrate: ${bestBitrate} Mb/s, New best quality: ${best}`,
-          "VERBOSE"
+          "VERBOSE",
         );
       }
     } else {
@@ -92,7 +92,7 @@ export const findBestQuality = async (
 
         log(
           `New best bitrate: ${bestBitrate} Mb/s, New best quality: ${best}`,
-          "VERBOSE"
+          "VERBOSE",
         );
       }
 

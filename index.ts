@@ -2,7 +2,7 @@ import { $ } from "bun";
 import { mkdir, stat } from "node:fs/promises";
 import { basename, extname, join, resolve } from "node:path";
 import { exit } from "node:process";
-import { DEVELOPMENT, METADATA_DIR, TEMP_DIR } from "./consts";
+import { DEVELOPMENT, METADATA_DIR, SOURCE_DIR, TEMP_DIR } from "./consts";
 import { exportSubtitles } from "./export-subs";
 import { transcodeVideos } from "./transcode-videos";
 import { transferFiles } from "./transfer-files";
@@ -71,24 +71,22 @@ async function main() {
 
     const now = performance.now();
 
-    const getArgs = () => {
+    const verifyArgs = () => {
       const args = Bun.argv;
 
-      if (args.length < 4) {
+      if (args.length < 3) {
         log("Arguments missing", "ERROR");
         cleanup(0);
       }
-
-      return {
-        TORRENT_NAME: args[2]!,
-        SOURCE_DIR: args[3]!,
-      };
     };
 
-    const { TORRENT_NAME, SOURCE_DIR } = getArgs();
+    verifyArgs();
+
+    const TORRENT_NAME = Bun.argv[2]!;
+
     log(
       `\n[INPUT] torrent name: ${TORRENT_NAME} \n[INPUT] source dir: ${SOURCE_DIR}`,
-      "VERBOSE"
+      "VERBOSE",
     );
 
     // check if source exists
@@ -101,29 +99,29 @@ async function main() {
     const jsonPath = resolve(METADATA_DIR, `${TORRENT_NAME}.json`);
 
     const { data: metadata, error: jsonError } = await tryCatch<JSONMetadata>(
-      readJsonFile(jsonPath)
+      readJsonFile(jsonPath),
     );
     if (jsonError) {
       return log(
         `Metadata file for ${TORRENT_NAME} not found: ${jsonError}`,
-        "ERROR"
+        "ERROR",
       );
     }
 
     let tempDir = await GenericFile.init(
-      clearTags(join(TEMP_DIR, TORRENT_NAME))
+      clearTags(join(TEMP_DIR, TORRENT_NAME)),
     );
 
     if (source.fileType === "file") {
       const torrentBasename = basename(TORRENT_NAME, extname(TORRENT_NAME));
       tempDir = await GenericFile.init(
-        clearTags(join(TEMP_DIR, torrentBasename))
+        clearTags(join(TEMP_DIR, torrentBasename)),
       );
     }
 
     log(
       `\n JSONPATH: ${jsonPath} \n SOURCE_DIR: ${source.unixPath} \n TEMPTORRENTDIR: ${tempDir.unixPath}`,
-      "VERBOSE"
+      "VERBOSE",
     );
 
     // copy source files to temp directory
@@ -139,7 +137,7 @@ async function main() {
     };
 
     const { data: _, error: tempError } = await tryCatch(
-      stat(tempDir.unixPath)
+      stat(tempDir.unixPath),
     );
     if (tempError || !DEVELOPMENT) {
       await copyToTempDir();
@@ -147,8 +145,8 @@ async function main() {
 
     const originalMetadata = await tempDir.getDetails();
 
-    await exportSubtitles(tempDir.unixPath);
-    Bun.sleep(2000);
+    // await exportSubtitles(tempDir.unixPath);
+    // Bun.sleep(2000);
     await transcodeVideos(tempDir.unixPath, metadata.category);
     Bun.sleep(2000);
     await transferFiles(tempDir.unixPath, metadata);
