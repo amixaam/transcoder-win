@@ -24,6 +24,7 @@ import {
 } from "./utils";
 import { GenericFile } from "./utils/media-file";
 import { tryCatch } from "./utils/try-catch";
+import { sendCompletionNotification } from "./discord-notify";
 
 // An All-in-One solution for Windows users who want to export subs, transcode their media files to .mp4 and upload them to a server AUTOMATICALLY.
 // CHECK CONSTS.TS FOR CONFIGURATION OPTIONS.
@@ -93,7 +94,7 @@ async function main() {
 
     log(
       `\n[INPUT] torrent name: ${TORRENT_NAME} \n[INPUT] source dir: ${SOURCE_DIR}`,
-      "VERBOSE"
+      "VERBOSE",
     );
 
     // check if source exists
@@ -107,31 +108,31 @@ async function main() {
 
     let metadata: JSONMetadata = DEFAULT_JSON;
     const { data: jsonData, error: jsonError } = await tryCatch<JSONMetadata>(
-      readJsonFile(jsonPath)
+      readJsonFile(jsonPath),
     );
     if (jsonError) {
       log(
         `Metadata file for ${TORRENT_NAME} not found: ${jsonError}. using default values: category = "anime", torrent_type = "new"`,
-        "WARN"
+        "WARN",
       );
     } else {
       metadata = jsonData;
     }
 
     let tempDir = await GenericFile.init(
-      clearTags(join(TEMP_DIR, TORRENT_NAME))
+      clearTags(join(TEMP_DIR, TORRENT_NAME)),
     );
 
     if (source.fileType === "file") {
       const torrentBasename = basename(TORRENT_NAME, extname(TORRENT_NAME));
       tempDir = await GenericFile.init(
-        clearTags(join(TEMP_DIR, torrentBasename))
+        clearTags(join(TEMP_DIR, torrentBasename)),
       );
     }
 
     log(
       `\n JSONPATH: ${jsonPath} \n SOURCE_DIR: ${source.unixPath} \n TEMPTORRENTDIR: ${tempDir.unixPath}`,
-      "VERBOSE"
+      "VERBOSE",
     );
 
     // copy source files to temp directory
@@ -147,7 +148,7 @@ async function main() {
     };
 
     const { data: _, error: tempError } = await tryCatch(
-      stat(tempDir.unixPath)
+      stat(tempDir.unixPath),
     );
     if (tempError || !DEVELOPMENT) {
       await copyToTempDir();
@@ -183,6 +184,10 @@ async function main() {
     log(`size after: ${newMetadata.size} MB`);
     log(`size difference: ${originalMetadata.size - newMetadata.size} MB`);
     log("-------------------------------------");
+
+    await sendCompletionNotification(
+      `Transcoded ${TORRENT_NAME} in ${getPerformance(now)}:\n\nSize before: ${originalMetadata.size} MB\nSize after: ${newMetadata.size} MB\nSize difference: ${originalMetadata.size - newMetadata.size} MB\n`,
+    );
 
     await releaseLock();
   } catch (error) {

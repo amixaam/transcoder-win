@@ -1,6 +1,7 @@
 import { DEFAULT_Q, SAMPLE_LENGTH, SAMPLES } from "./consts";
+import { sendCompletionNotification } from "./discord-notify";
 import { Handbrake } from "./utils/handbrake";
-import { MediaFile } from "./utils/media-file";
+import { GenericFile, MediaFile } from "./utils/media-file";
 
 const path = "/Users/robertsbrinkis/Downloads/Specials/Konosuba.mp4";
 
@@ -18,7 +19,6 @@ const path = "/Users/robertsbrinkis/Downloads/Specials/Konosuba.mp4";
 // console.log(await res.getDetails());
 
 // input
-
 const video = await MediaFile.init(Bun.argv[2]!);
 console.log(await video.getDetails());
 

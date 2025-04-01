@@ -1,6 +1,15 @@
 import { dirname, resolve } from "node:path";
 import type { JSONMetadata } from "./utils";
 
+declare module "bun" {
+  interface Env {
+    TRANSFER_TO_USER: string;
+    TRANSFER_TO_IP: string;
+    DISCORD_BOT_TOKEN: string;
+    DISCORD_USER_ID: string;
+  }
+}
+
 // works with sources being sent as a windows path
 // if any path below is the opposite path (windows vs WSL), then it will probably error.
 
@@ -132,7 +141,7 @@ export const SKIP_SLEEP = false;
 export const DEVELOPMENT = false;
 
 // transfer files to this IP address
-const TRANSFER_TO_USER = "roberts";
-const TRANSFER_TO_IP = "192.168.2.11";
+const TRANSFER_TO_USER = process.env.TRANSFER_TO_USER;
+const TRANSFER_TO_IP = process.env.TRANSFER_TO_IP;
 export const TRANSFER_TO = `${TRANSFER_TO_USER}@${TRANSFER_TO_IP}`;
 export const TRANSFER_DIR = "/media/roberts/jellyfin/media/UNSORTED";

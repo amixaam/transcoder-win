@@ -10,6 +10,7 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.13",
+    "discord.js": "^14.18.0"
   }
 }
