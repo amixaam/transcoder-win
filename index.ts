@@ -1,10 +1,11 @@
-import { $ } from "bun";
+import { $, fetch } from "bun";
 import { mkdir, stat } from "node:fs/promises";
 import { basename, extname, join, resolve } from "node:path";
 import { exit } from "node:process";
 import {
   DEFAULT_JSON,
   DEVELOPMENT,
+  FRONTEND_API,
   METADATA_DIR,
   SOURCE_DIR,
   TEMP_DIR,
@@ -119,6 +120,16 @@ async function main() {
       metadata = jsonData;
     }
 
+    await fetch(FRONTEND_API + `torrents/${metadata.id!}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        state: "transcoding",
+      }),
+    });
+
     let tempDir = await GenericFile.init(
       clearTags(join(TEMP_DIR, TORRENT_NAME)),
     );
@@ -177,8 +188,30 @@ async function main() {
 
     if (!originalMetadata || !newMetadata) {
       await releaseLock();
+      await fetch(FRONTEND_API + `torrents/${metadata.id!}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          state: "done",
+        }),
+      });
       return;
     }
+
+    await fetch(FRONTEND_API + `torrents/${metadata.id!}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        state: "done",
+        options: {
+          finalSize: newMetadata.size * 1000 * 1000,
+        },
+      }),
+    });
 
     log(`size before: ${originalMetadata.size} MB`);
     log(`size after: ${newMetadata.size} MB`);

@@ -7,6 +7,7 @@ declare module "bun" {
     TRANSFER_TO_IP: string;
     DISCORD_BOT_TOKEN: string;
     DISCORD_USER_ID: string;
+    API_URL: string;
   }
 }
 
@@ -64,13 +65,8 @@ export const KEEP_LANGUAGE_CODES = [
 ];
 
 export const DEFAULT_JSON: JSONMetadata = {
-  media_output_directory: "",
-  json_output_directory: "",
   torrent_type: "new",
-  category: "anime",
-  hash: "",
-  name: "",
-  size: "",
+  category: "animated",
 };
 
 // subtitle presets should be within ./presets/
@@ -116,9 +112,9 @@ export const software_h265_10 = "x265_10bit";
 // allows bitrate to be below the min if source is below the min aswell.
 // change the ranges to fit your needs / network speed
 export const BITRATE_RANGES = {
-  Anime: [1, 3.5],
-  Shows: [2, 4.25],
-  Movies: [2, 6],
+  animated: [1, 3.5],
+  shows: [2, 4.25],
+  movies: [2, 6],
 };
 
 // After transcoding, only keep these extensions, delete rest
@@ -145,3 +141,6 @@ const TRANSFER_TO_USER = process.env.TRANSFER_TO_USER;
 const TRANSFER_TO_IP = process.env.TRANSFER_TO_IP;
 export const TRANSFER_TO = `${TRANSFER_TO_USER}@${TRANSFER_TO_IP}`;
 export const TRANSFER_DIR = "/media/roberts/jellyfin/media/UNSORTED";
+
+// an api to return progress, for my personal use
+export const FRONTEND_API = process.env.API_URL;

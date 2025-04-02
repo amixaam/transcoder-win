@@ -1,9 +1,14 @@
-import { DEFAULT_Q, SAMPLE_LENGTH, SAMPLES } from "./consts";
+import { DEFAULT_Q, FRONTEND_API, SAMPLE_LENGTH, SAMPLES } from "./consts";
 import { sendCompletionNotification } from "./discord-notify";
 import { Handbrake } from "./utils/handbrake";
 import { GenericFile, MediaFile } from "./utils/media-file";
 
 const path = "/Users/robertsbrinkis/Downloads/Specials/Konosuba.mp4";
+
+const apiRes = await fetch(FRONTEND_API + "torrents/recent");
+const data = await apiRes.json();
+console.log("res", data[0]);
+process.exit(0);
 
 // const video = await MediaFile.init(path);
 // const handbrake = await Handbrake.init(video);

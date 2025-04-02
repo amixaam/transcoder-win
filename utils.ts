@@ -12,13 +12,9 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 
 export interface JSONMetadata {
-  media_output_directory: string;
-  json_output_directory: string;
   torrent_type: "new" | "episode" | "season";
-  category: string;
-  hash: string;
-  name: string;
-  size: string;
+  category: "animated" | "movie" | "tv show" | "other";
+  id?: number;
 }
 
 export const round = (unit: number) => {
@@ -144,7 +140,7 @@ export const getPerformance = (startTime: number) => {
 
 export const log = async (
   message: string,
-  tag: "LOG" | "WARN" | "ERROR" | "VERBOSE" = "LOG"
+  tag: "LOG" | "WARN" | "ERROR" | "VERBOSE" = "LOG",
 ) => {
   if (!VERBOSE && tag === "VERBOSE") return;
 
@@ -254,7 +250,7 @@ export function sanitizeFilename(filename: string): string {
   sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, "-"); // Control characters
   sanitized = sanitized.replace(
     /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i,
-    "-"
+    "-",
   ); // Reserved names
 
   // Remove or trim leading and trailing spaces

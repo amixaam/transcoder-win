@@ -6,15 +6,15 @@ import { tryCatch } from "./utils/try-catch";
 import { log } from "./utils";
 
 const getBitrateRange = (category: string) => {
-  if (category.includes("anime")) return BITRATE_RANGES.Anime;
-  else if (category.includes("shows")) return BITRATE_RANGES.Shows;
-  else return BITRATE_RANGES.Movies;
+  if (category.includes("animated")) return BITRATE_RANGES.animated;
+  else if (category.includes("shows")) return BITRATE_RANGES.shows;
+  else return BITRATE_RANGES.movies;
 };
 
 // using binary search, finds the best quality value for a video
 export const findBestQuality = async (
   video: MediaFile,
-  category: string
+  category: string,
 ): Promise<number> => {
   // binary search
   //
@@ -41,7 +41,7 @@ export const findBestQuality = async (
 
   log(
     `Source size: ${metadata.size} MB, Bitrate: ${metadata.bitrate} Mb/s`,
-    "VERBOSE"
+    "VERBOSE",
   );
 
   while (low < high && attempts < 6 && Math.abs(high - low) >= 0.3) {
@@ -50,7 +50,7 @@ export const findBestQuality = async (
     log("next sample -------------->");
     log(
       `attempt: #${attempts}, low: ${low}, high: ${high}, mid: ${mid}, best: ${best}, bestBitrate: ${bestBitrate}`,
-      "VERBOSE"
+      "VERBOSE",
     );
 
     const { data, error } = await tryCatch(
@@ -58,7 +58,7 @@ export const findBestQuality = async (
         quality: mid,
         samples: SAMPLES,
         sampleLength: SAMPLE_LENGTH,
-      })
+      }),
     );
 
     if (error) {
@@ -73,19 +73,19 @@ export const findBestQuality = async (
       low = mid + 1;
       log(
         `Sample size too high, ${estimatedSize} > ${metadata.size * 0.95}`,
-        "WARN"
+        "WARN",
       );
     } else if (avgBitrate > metadata.bitrate * 0.95) {
       low = mid + 1;
       log(
         `Sample bitrate too high, ${avgBitrate} > ${metadata.bitrate * 0.95}`,
-        "WARN"
+        "WARN",
       );
     } else if (avgBitrate > bitrateRange[1]) {
       low = mid + 1;
       log(
         `Sample bitrate too high, ${avgBitrate} > ${bitrateRange[1]}`,
-        "WARN"
+        "WARN",
       );
     } else if (avgBitrate < bitrateRange[0]) {
       high = mid - 1;
@@ -94,12 +94,12 @@ export const findBestQuality = async (
         best = mid;
         log(
           `New best bitrate: ${bestBitrate} Mb/s, New best quality: ${best}`,
-          "VERBOSE"
+          "VERBOSE",
         );
       } else {
         log(
           `Sample bitrate too low, ${avgBitrate} < ${bitrateRange[0]}`,
-          "WARN"
+          "WARN",
         );
       }
     } else {
@@ -109,11 +109,11 @@ export const findBestQuality = async (
 
         log(
           `New best bitrate: ${bestBitrate} Mb/s, New best quality: ${best}`,
-          "VERBOSE"
+          "VERBOSE",
         );
       } else {
         log(
-          `Sample within range, ${avgBitrate} Mb/s, but not best yet (best: ${bestBitrate} Mb/s)`
+          `Sample within range, ${avgBitrate} Mb/s, but not best yet (best: ${bestBitrate} Mb/s)`,
         );
       }
 
