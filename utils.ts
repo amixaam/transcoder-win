@@ -196,7 +196,7 @@ export function formatSeconds(totalSeconds: number) {
 }
 
 export const acquireLock = async (): Promise<void> => {
-  log("Acquiring lock...");
+  log(`Acquiring lock for ${Bun.argv[2]!}...`);
   while (true) {
     try {
       // Check if lock file exists
